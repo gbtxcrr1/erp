@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <title>{% block title %}ERP{% endblock %}</title>
+</head>
+
+<body>
+
+    <h1>ERP Escola</h1>
+
+    <nav>
+    <a href="/">Início</a>
+
+    <a href="/clients">Clientes</a>
+
+    <a href="/products">Produtos</a>
+
+    </nav>
+
+    <hr>
+
+    {% block content %}
+    {% endblock %}
+
+</body>
+</html>
