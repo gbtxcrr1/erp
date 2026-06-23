@@ -1,7 +1,8 @@
 from flask import Flask, render_template
+from flask import request, redirect, url_for
 
 from config import Config
-from models import db
+from models import db, Client
 
 app = Flask(__name__)
 app.config.from_object(Config)
@@ -14,7 +15,23 @@ def home():
 
 @app.route("/clients")
 def clients():
-    return render_template("clients.html")
+    clients = Client.query.all()
+    return render_template("clients.html", clients=clients)
+
+@app.route("/clients/new", methods=["GET", "POST"])
+def new_client():
+    if request.method == "POST":
+        name = request.form["name"]
+        email = request.form["email"]
+
+        new_client = Client(name=name, email=email)
+
+        db.session.add(new_client)
+        db.session.commit()
+
+        return redirect(url_for("clients"))
+
+    return render_template("new_client.html")
 
 @app.route("/products")
 def products():

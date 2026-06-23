@@ -3,25 +3,25 @@
 <head>
     <meta charset="UTF-8">
     <title>{% block title %}ERP{% endblock %}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css')}}">
 </head>
 
 <body>
 
-    <h1>ERP Escola</h1>
+    <h1>ERP</h1>
 
     <nav>
-    <a href="/">Início</a>
-
-    <a href="/clients">Clientes</a>
-
-    <a href="/products">Produtos</a>
-
+        <a href="/">Início</a>
+        <a href="/clients">Clientes</a>
+        <a href="/clients/new">Novo Cliente</a>
+        <a href="/products">Produtos</a>
     </nav>
 
     <hr>
 
-    {% block content %}
-    {% endblock %}
+    <div class="container">
+        {% block content %}{% endblock %}
+    </div>
 
 </body>
 </html>

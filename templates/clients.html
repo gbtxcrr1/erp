@@ -8,6 +8,26 @@ Clientes
 
 <h2>Clientes</h2>
 
-<p>Aqui ficará a lista de clientes.</p>
+<div class="top-bar">
+    <a class="btn" href="/clients/new">Novo Cliente</a>
+</div>
+
+<table>
+    <thead>
+        <th>ID</th>
+        <th>NOME</th>
+        <th>EMAIL</th>
+    </thead>
+
+    <tbody>
+        {% for client in clients %}
+        <tr>
+            <td>{{ client.id }}</td>
+            <td>{{ client.name }}</td>
+            <td>{{ client.email }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
 
 {% endblock %}
