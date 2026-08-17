@@ -16,7 +16,13 @@ Clientes
     <thead>
         <th>ID</th>
         <th>NOME</th>
+        <th>CPF</th>
+        <th>TELEFONE</th>
         <th>EMAIL</th>
+        <th>ENDEREÇO</th>
+        <th>CIDADE</th>
+        <th>ESTADO</th>
+        <th>CEP</th>
     </thead>
 
     <tbody>
@@ -24,7 +30,13 @@ Clientes
         <tr>
             <td>{{ client.id }}</td>
             <td>{{ client.name }}</td>
+            <td>{{ client.cpf }}</td>
+            <td>{{ client.phone }}</td>
             <td>{{ client.email }}</td>
+            <td>{{ client.address }}</td>
+            <td>{{ client.city }}</td>
+            <td>{{ client.state }}</td>
+            <td>{{ client.cep }}</td>
         </tr>
         {% endfor %}
     </tbody>
