@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+
+{% block title %}
+Login
+{% endblock %}
+
+{% block content %}
+
+<div class="login-logo">
+    <img src="{{ url_for('static', filename='img/logo.png') }}" alt="Logo ERP">
+</div>
+
+<h2 class="login-title">Acessar o Sistema</h2>
+
+<div class="form login-form">
+    <form method="POST">
+        <label>Usuário</label>
+        <input name="username" placeholder="usuário" required autofocus>
+
+        <label>Senha</label>
+        <input type="password" name="password" placeholder="senha" required>
+
+        <div class="form-actions">
+            <button class="btn" type="submit">Entrar</button>
+        </div>
+    </form>
+</div>
+
+{% endblock %}

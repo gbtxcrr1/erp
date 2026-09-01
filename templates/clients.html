@@ -23,6 +23,7 @@ Clientes
         <th>CIDADE</th>
         <th>ESTADO</th>
         <th>CEP</th>
+        <th>AÇÕES</th>
     </thead>
 
     <tbody>
@@ -37,6 +38,16 @@ Clientes
             <td>{{ client.city }}</td>
             <td>{{ client.state }}</td>
             <td>{{ client.cep }}</td>
+            <td class="actions">
+                <a class="btn btn-small" href="/clients/{{ client.id }}/edit">Editar</a>
+                <form method="POST" action="/clients/{{ client.id }}/delete" class="inline-form">
+                    <button class="btn btn-small btn-danger" type="submit" onclick="return confirm('Excluir este cliente?')">Excluir</button>
+                </form>
+            </td>
+        </tr>
+        {% else %}
+        <tr>
+            <td colspan="10" class="empty">Nenhum cliente cadastrado ainda.</td>
         </tr>
         {% endfor %}
     </tbody>

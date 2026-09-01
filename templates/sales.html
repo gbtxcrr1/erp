@@ -5,6 +5,47 @@ Vendas
 {% endblock %}
 
 {% block content %}
+
 <h2>Vendas</h2>
-<p>Aqui ficarão as vendas.</p>
+
+<div class="top-bar">
+    <a class="btn" href="/sales/new">Nova Venda</a>
+</div>
+
+<table>
+    <thead>
+        <th>ID</th>
+        <th>DATA</th>
+        <th>CLIENTE</th>
+        <th>PRODUTO</th>
+        <th>QUANTIDADE</th>
+        <th>PREÇO UNIT.</th>
+        <th>TOTAL</th>
+        <th>AÇÕES</th>
+    </thead>
+
+    <tbody>
+        {% for sale in sales %}
+        <tr>
+            <td>{{ sale.id }}</td>
+            <td>{{ sale.date.strftime('%d/%m/%Y %H:%M') }}</td>
+            <td>{{ sale.client.name }}</td>
+            <td>{{ sale.product.name }}</td>
+            <td>{{ sale.quantity }}</td>
+            <td>R$ {{ '%.2f'|format(sale.unit_price) }}</td>
+            <td>R$ {{ '%.2f'|format(sale.total_price) }}</td>
+            <td class="actions">
+                <form method="POST" action="/sales/{{ sale.id }}/delete" class="inline-form">
+                    <button class="btn btn-small btn-danger" type="submit" onclick="return confirm('Excluir esta venda?')">Excluir</button>
+                </form>
+            </td>
+        </tr>
+        {% else %}
+        <tr>
+            <td colspan="8" class="empty">Nenhuma venda registrada ainda.</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
 {% endblock %}

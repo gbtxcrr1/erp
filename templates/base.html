@@ -2,25 +2,42 @@
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}ERP{% endblock %}</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css')}}">
 </head>
 
 <body>
+    {% if g.user %}
     <nav>
-        <a href="/">Início</a>
-        <a href="/clients">Clientes</a>
-        <a href="/products">Produtos</a>
-        <a href="/sales">Vendas</a>
-        <a href="/stock">Estoque</a>
-        <a href="/finance">Financeiro</a>
-        <a href="/support">Suporte</a>
-        <a href="/employees">Funcionários</a>
+        <a href="/" class="brand">
+            <img src="{{ url_for('static', filename='img/logo.png') }}" alt="Logo" class="brand-logo">
+        </a>
+        <a href="/" class="{{ 'active' if request.path == '/' }}">Início</a>
+        <a href="/clients" class="{{ 'active' if request.path.startswith('/clients') }}">Clientes</a>
+        <a href="/products" class="{{ 'active' if request.path.startswith('/products') }}">Produtos</a>
+        <a href="/sales" class="{{ 'active' if request.path.startswith('/sales') }}">Vendas</a>
+        <a href="/stock" class="{{ 'active' if request.path.startswith('/stock') }}">Estoque</a>
+        <a href="/finance" class="{{ 'active' if request.path.startswith('/finance') }}">Financeiro</a>
+        <a href="/support" class="{{ 'active' if request.path.startswith('/support') }}">Suporte</a>
+        <a href="/employees" class="{{ 'active' if request.path.startswith('/employees') }}">Funcionários</a>
+        <span class="nav-user">Olá, {{ g.user.username }}</span>
+        <a class="btn btn-logout" href="/logout">Sair</a>
     </nav>
-
     <hr>
+    {% endif %}
 
     <div class="container">
+        {% with messages = get_flashed_messages() %}
+            {% if messages %}
+                <div class="flash">
+                    {% for message in messages %}
+                        <div class="flash-message">{{ message }}</div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        {% endwith %}
+
         {% block content %}{% endblock %}
     </div>
 

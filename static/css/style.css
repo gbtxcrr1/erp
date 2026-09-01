@@ -1,22 +1,81 @@
 body {
-    font-family: Arial;
+    font-family: Arial, sans-serif;
     margin: 0;
-    background: #ece4e4;
+    background: #eaf0f8;
 }
 
 nav {
-    background: #222;
+    background: #123a6b;
     padding: 10px;
+    display: flex;
+    align-items: center;
 }
 
 nav a {
     color: white;
     margin-right: 15px;
     text-decoration: none;
+    padding: 7px 10px;
+    border-radius: 4px;
+}
+
+nav a:hover {
+    background: rgba(255, 255, 255, 0.15);
+}
+
+nav a.active {
+    background: #2d6cdf;
+}
+
+/* Logo no menu */
+.brand {
+    margin-right: 8px;
+    padding: 0;
+    line-height: 0;
+}
+
+.brand-logo {
+    height: 34px;
+    width: auto;
+    border-radius: 4px;
+}
+
+/* Logo na tela de login */
+.login-logo {
+    text-align: center;
+    margin-bottom: 6px;
+}
+
+.login-logo img {
+    width: 150px;
+    height: auto;
+}
+
+.login-title {
+    text-align: center;
+    margin-top: 0;
+}
+
+.nav-user {
+    color: #dbe7ff;
+    margin-left: auto;
+    margin-right: 10px;
+    font-size: 14px;
+}
+
+.btn-logout {
+    background: #2d6cdf;
+    padding: 6px 12px;
+}
+
+.btn-logout:hover {
+    background: #1b4fb3;
 }
 
 .container {
     padding: 20px;
+    max-width: 1200px;
+    margin: 0 auto;
 }
 
 table {
@@ -31,8 +90,14 @@ th, td {
 }
 
 th {
-    background: #eee;
+    background: #e3edf9;
     text-align: left;
+}
+
+td.empty {
+    text-align: center;
+    color: #888;
+    padding: 25px;
 }
 
 .btn {
@@ -41,12 +106,171 @@ th {
     color: white;
     text-decoration: none;
     border-radius: 4px;
+    border: none;
+    cursor: pointer;
+    font-size: 14px;
+    display: inline-block;
 }
 
 .btn:hover {
     background: #1b4fb3;
 }
 
+.btn-small {
+    padding: 5px 9px;
+    font-size: 13px;
+}
+
+.btn-secondary {
+    background: #6c757d;
+}
+
+.btn-secondary:hover {
+    background: #565e64;
+}
+
+/* "Excluir" — usa azul em vez de vermelho, conforme pedido */
+.btn-danger {
+    background: #3769b5;
+}
+
+.btn-danger:hover {
+    background: #274d8a;
+}
+
 .top-bar {
     margin-bottom: 15px;
+}
+
+.actions {
+    white-space: nowrap;
+}
+
+.inline-form {
+    display: inline;
+}
+
+/* ===== Formulários ===== */
+.form {
+    background: white;
+    padding: 20px;
+    border-radius: 6px;
+    max-width: 500px;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.1);
+}
+
+.login-form {
+    max-width: 360px;
+    margin: 30px auto;
+    text-align: left;
+    border-top: 4px solid #2d6cdf;
+}
+
+.form label {
+    display: block;
+    font-weight: bold;
+    margin: 12px 0 4px;
+}
+
+.form input,
+.form select,
+.form textarea {
+    width: 100%;
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    box-sizing: border-box;
+    font-size: 14px;
+}
+
+.form input:focus {
+    border-color: #2d6cdf;
+    outline: none;
+    box-shadow: 0 0 0 2px rgba(45, 108, 223, 0.2);
+}
+
+.form textarea {
+    min-height: 90px;
+    resize: vertical;
+}
+
+.form-actions {
+    margin-top: 20px;
+    display: flex;
+    gap: 10px;
+}
+
+/* ===== Badges ===== */
+.badge {
+    padding: 4px 9px;
+    border-radius: 12px;
+    font-size: 12px;
+    color: white;
+    display: inline-block;
+}
+
+.badge-ok {
+    background: #2d8f5a;
+}
+
+.badge-warning {
+    background: #cf9d1e;
+    color: white;
+}
+
+/* "Esgotado"/ruim — azul escuro em vez de vermelho */
+.badge-danger {
+    background: #2b5a9e;
+}
+
+/* ===== Resumo financeiro ===== */
+.summary {
+    display: flex;
+    gap: 15px;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+}
+
+.summary-card {
+    background: white;
+    padding: 18px 22px;
+    border-radius: 6px;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.1);
+    min-width: 180px;
+    flex: 1;
+}
+
+.summary-label {
+    display: block;
+    font-size: 13px;
+    color: #777;
+    margin-bottom: 6px;
+}
+
+.summary-value {
+    font-size: 22px;
+    font-weight: bold;
+}
+
+.summary-value.revenue {
+    color: #2d8f5a;
+}
+
+/* Despesa — azul em vez de vermelho */
+.summary-value.expense {
+    color: #2b5a9e;
+}
+
+/* ===== Mensagens flash ===== */
+.flash {
+    margin-bottom: 15px;
+}
+
+.flash-message {
+    background: #dcebfa;
+    color: #123a6b;
+    padding: 10px 14px;
+    border-radius: 4px;
+    margin-bottom: 6px;
+    border: 1px solid #b9d4f0;
 }

@@ -1,28 +1,41 @@
 {% extends "base.html" %}
 
+{% block title %}
+{{ 'Editar Cliente' if client else 'Novo Cliente' }}
+{% endblock %}
+
 {% block content %}
-<h2>Novo Cliente</h2>
+<h2>{{ 'Editar Cliente' if client else 'Novo Cliente' }}</h2>
 
-<form method="POST">
-    <input name="name" placeholder="nome">
-    <br><br>
-    <input name="cpf" placeholder="cpf">
-    <br><br>
-    <input name="phone" placeholder="telefone">
-    <br><br>
-    <input name="email" placeholder="email">
-    <br><br>
-    <input name="address" placeholder="endereço">
-    <br><br>
-    <input name="city" placeholder="cidade">
-    <br><br>
-    <input name="state" placeholder="estado">
-    <br><br>
-    <input name="cep" placeholder="cep">
-    <br><br>
+<form method="POST" class="form">
+    <label>Nome</label>
+    <input name="name" placeholder="nome" value="{{ client.name if client else '' }}" required>
 
-    <button class="btn" type="submit">Salvar</button>
+    <label>CPF</label>
+    <input name="cpf" placeholder="cpf" value="{{ client.cpf if client else '' }}" required>
 
+    <label>Telefone</label>
+    <input name="phone" placeholder="telefone" value="{{ client.phone if client else '' }}">
+
+    <label>Email</label>
+    <input name="email" placeholder="email" value="{{ client.email if client else '' }}" required>
+
+    <label>Endereço</label>
+    <input name="address" placeholder="endereço" value="{{ client.address if client else '' }}">
+
+    <label>Cidade</label>
+    <input name="city" placeholder="cidade" value="{{ client.city if client else '' }}">
+
+    <label>UF</label>
+    <input name="state" placeholder="estado" value="{{ client.state if client else '' }}">
+
+    <label>CEP</label>
+    <input name="cep" placeholder="cep" value="{{ client.cep if client else '' }}">
+
+    <div class="form-actions">
+        <button class="btn" type="submit">Salvar</button>
+        <a class="btn btn-secondary" href="/clients">Cancelar</a>
+    </div>
 </form>
 
 {% endblock %}

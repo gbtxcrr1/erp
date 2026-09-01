@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+
+{% block title %}
+{{ 'Editar Chamado' if ticket else 'Novo Chamado' }}
+{% endblock %}
+
+{% block content %}
+<h2>{{ 'Editar Chamado' if ticket else 'Novo Chamado' }}</h2>
+
+<form method="POST" class="form">
+    <label>Cliente</label>
+    <select name="client_id" {% if ticket %}disabled{% endif %} required>
+        <option value="">Selecione...</option>
+        {% for client in clients %}
+            <option value="{{ client.id }}" {% if ticket and ticket.client_id == client.id %}selected{% endif %}>
+                {{ client.name }}
+            </option>
+        {% endfor %}
+    </select>
+    {% if ticket %}
+        <input type="hidden" name="client_id" value="{{ ticket.client_id }}">
+    {% endif %}
+
+    <label>Assunto</label>
+    <input name="subject" placeholder="assunto" value="{{ ticket.subject if ticket else '' }}" required>
+
+    <label>Descrição</label>
+    <textarea name="description" placeholder="descreva o problema...">{{ ticket.description if ticket else '' }}</textarea>
+
+    <label>Prioridade</label>
+    <select name="priority">
+        <option value="baixa" {{ 'selected' if ticket and ticket.priority == 'baixa' }}>Baixa</option>
+        <option value="média" {{ 'selected' if not ticket or ticket.priority == 'média' }}>Média</option>
+        <option value="alta" {{ 'selected' if ticket and ticket.priority == 'alta' }}>Alta</option>
+    </select>
+
+    <label>Status</label>
+    <select name="status">
+        <option value="aberto" {{ 'selected' if not ticket or ticket.status == 'aberto' }}>Aberto</option>
+        <option value="em andamento" {{ 'selected' if ticket and ticket.status == 'em andamento' }}>Em andamento</option>
+        <option value="fechado" {{ 'selected' if ticket and ticket.status == 'fechado' }}>Fechado</option>
+    </select>
+
+    <div class="form-actions">
+        <button class="btn" type="submit">Salvar</button>
+        <a class="btn btn-secondary" href="/support">Cancelar</a>
+    </div>
+</form>
+
+{% endblock %}

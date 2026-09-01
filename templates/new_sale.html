@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+
+{% block title %}
+Nova Venda
+{% endblock %}
+
+{% block content %}
+<h2>Nova Venda</h2>
+
+<form method="POST" class="form">
+    <label>Cliente</label>
+    <select name="client_id" required>
+        <option value="">Selecione...</option>
+        {% for client in clients %}
+            <option value="{{ client.id }}">{{ client.name }}</option>
+        {% endfor %}
+    </select>
+
+    <label>Produto</label>
+    <select name="product_id" required>
+        <option value="">Selecione...</option>
+        {% for product in products %}
+            <option value="{{ product.id }}">{{ product.name }} — R$ {{ '%.2f'|format(product.price) }}</option>
+        {% endfor %}
+    </select>
+
+    <label>Quantidade</label>
+    <input type="number" name="quantity" value="1" min="1" required>
+
+    <div class="form-actions">
+        <button class="btn" type="submit">Registrar Venda</button>
+        <a class="btn btn-secondary" href="/sales">Cancelar</a>
+    </div>
+</form>
+
+{% endblock %}

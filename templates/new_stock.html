@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+
+{% block title %}
+{{ 'Editar Estoque' if item else 'Adicionar ao Estoque' }}
+{% endblock %}
+
+{% block content %}
+<h2>{{ 'Editar Estoque' if item else 'Adicionar ao Estoque' }}</h2>
+
+<form method="POST" class="form">
+    <label>Produto</label>
+    <select name="product_id" {% if item %}disabled{% endif %}>
+        {% for product in products %}
+            <option value="{{ product.id }}" {% if item and item.product_id == product.id %}selected{% endif %}>
+                {{ product.name }}
+            </option>
+        {% endfor %}
+    </select>
+
+    <label>Quantidade</label>
+    <input type="number" name="quantity" value="{{ item.quantity if item else 0 }}" required>
+
+    <label>Quantidade mínima</label>
+    <input type="number" name="min_quantity" value="{{ item.min_quantity if item else 0 }}">
+
+    <label>Localização</label>
+    <input name="location" placeholder="local" value="{{ item.location if item else '' }}">
+
+    {% if item %}
+        <input type="hidden" name="product_id" value="{{ item.product_id }}">
+    {% endif %}
+
+    <div class="form-actions">
+        <button class="btn" type="submit">Salvar</button>
+        <a class="btn btn-secondary" href="/stock">Cancelar</a>
+    </div>
+</form>
+
+{% endblock %}

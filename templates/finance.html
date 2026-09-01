@@ -5,6 +5,66 @@ Financeiro
 {% endblock %}
 
 {% block content %}
+
 <h2>Financeiro</h2>
-<p>Aqui ficará o financeiro.</p>
+
+<div class="summary">
+    <div class="summary-card">
+        <span class="summary-label">Receitas</span>
+        <span class="summary-value revenue">R$ {{ '%.2f'|format(total_revenue) }}</span>
+    </div>
+    <div class="summary-card">
+        <span class="summary-label">Despesas</span>
+        <span class="summary-value expense">R$ {{ '%.2f'|format(total_expense) }}</span>
+    </div>
+    <div class="summary-card">
+        <span class="summary-label">Saldo</span>
+        <span class="summary-value {{ 'revenue' if balance >= 0 else 'expense' }}">R$ {{ '%.2f'|format(balance) }}</span>
+    </div>
+</div>
+
+<div class="top-bar">
+    <a class="btn" href="/finance/new">Novo Lançamento</a>
+</div>
+
+<table>
+    <thead>
+        <th>ID</th>
+        <th>DATA</th>
+        <th>TIPO</th>
+        <th>DESCRIÇÃO</th>
+        <th>CATEGORIA</th>
+        <th>VALOR</th>
+        <th>AÇÕES</th>
+    </thead>
+
+    <tbody>
+        {% for transaction in transactions %}
+        <tr>
+            <td>{{ transaction.id }}</td>
+            <td>{{ transaction.date.strftime('%d/%m/%Y %H:%M') }}</td>
+            <td>
+                {% if transaction.type == 'receita' %}
+                    <span class="badge badge-ok">Receita</span>
+                {% else %}
+                    <span class="badge badge-danger">Despesa</span>
+                {% endif %}
+            </td>
+            <td>{{ transaction.description }}</td>
+            <td>{{ transaction.category }}</td>
+            <td>R$ {{ '%.2f'|format(transaction.amount) }}</td>
+            <td class="actions">
+                <form method="POST" action="/finance/{{ transaction.id }}/delete" class="inline-form">
+                    <button class="btn btn-small btn-danger" type="submit" onclick="return confirm('Excluir lançamento?')">Excluir</button>
+                </form>
+            </td>
+        </tr>
+        {% else %}
+        <tr>
+            <td colspan="7" class="empty">Nenhum lançamento registrado ainda.</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
 {% endblock %}

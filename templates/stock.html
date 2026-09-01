@@ -5,6 +5,54 @@ Estoque
 {% endblock %}
 
 {% block content %}
+
 <h2>Estoque</h2>
-<p>Aqui ficará o estoque.</p>
+
+<div class="top-bar">
+    <a class="btn" href="/stock/new">Adicionar ao Estoque</a>
+</div>
+
+<table>
+    <thead>
+        <th>ID</th>
+        <th>PRODUTO</th>
+        <th>QUANTIDADE</th>
+        <th>QTD. MÍNIMA</th>
+        <th>LOCALIZAÇÃO</th>
+        <th>STATUS</th>
+        <th>AÇÕES</th>
+    </thead>
+
+    <tbody>
+        {% for item in items %}
+        <tr>
+            <td>{{ item.id }}</td>
+            <td>{{ item.product.name }}</td>
+            <td>{{ item.quantity }}</td>
+            <td>{{ item.min_quantity }}</td>
+            <td>{{ item.location }}</td>
+            <td>
+                {% if item.quantity <= 0 %}
+                    <span class="badge badge-danger">Esgotado</span>
+                {% elif item.quantity < item.min_quantity %}
+                    <span class="badge badge-warning">Estoque baixo</span>
+                {% else %}
+                    <span class="badge badge-ok">OK</span>
+                {% endif %}
+            </td>
+            <td class="actions">
+                <a class="btn btn-small" href="/stock/{{ item.id }}/edit">Editar</a>
+                <form method="POST" action="/stock/{{ item.id }}/delete" class="inline-form">
+                    <button class="btn btn-small btn-danger" type="submit" onclick="return confirm('Excluir registro de estoque?')">Excluir</button>
+                </form>
+            </td>
+        </tr>
+        {% else %}
+        <tr>
+            <td colspan="7" class="empty">Nenhum registro de estoque ainda.</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
 {% endblock %}

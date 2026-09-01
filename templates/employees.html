@@ -5,6 +5,50 @@ Funcionários
 {% endblock %}
 
 {% block content %}
+
 <h2>Funcionários</h2>
-<p>Aqui ficarão os funcionários</p>
+
+<div class="top-bar">
+    <a class="btn" href="/employees/new">Novo Funcionário</a>
+</div>
+
+<table>
+    <thead>
+        <th>ID</th>
+        <th>NOME</th>
+        <th>CPF</th>
+        <th>CARGO</th>
+        <th>TELEFONE</th>
+        <th>EMAIL</th>
+        <th>SALÁRIO</th>
+        <th>DATA CONTRATAÇÃO</th>
+        <th>AÇÕES</th>
+    </thead>
+
+    <tbody>
+        {% for employee in employees %}
+        <tr>
+            <td>{{ employee.id }}</td>
+            <td>{{ employee.name }}</td>
+            <td>{{ employee.cpf }}</td>
+            <td>{{ employee.position }}</td>
+            <td>{{ employee.phone }}</td>
+            <td>{{ employee.email }}</td>
+            <td>R$ {{ '%.2f'|format(employee.salary) }}</td>
+            <td>{{ employee.hire_date.strftime('%d/%m/%Y') if employee.hire_date else '-' }}</td>
+            <td class="actions">
+                <a class="btn btn-small" href="/employees/{{ employee.id }}/edit">Editar</a>
+                <form method="POST" action="/employees/{{ employee.id }}/delete" class="inline-form">
+                    <button class="btn btn-small btn-danger" type="submit" onclick="return confirm('Excluir funcionário?')">Excluir</button>
+                </form>
+            </td>
+        </tr>
+        {% else %}
+        <tr>
+            <td colspan="9" class="empty">Nenhum funcionário cadastrado ainda.</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
 {% endblock %}

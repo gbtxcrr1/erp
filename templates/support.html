@@ -5,6 +5,54 @@ Suporte
 {% endblock %}
 
 {% block content %}
+
 <h2>Suporte</h2>
-<p>Aqui ficará o suporte.</p>
+
+<div class="top-bar">
+    <a class="btn" href="/support/new">Novo Chamado</a>
+</div>
+
+<table>
+    <thead>
+        <th>ID</th>
+        <th>DATA</th>
+        <th>CLIENTE</th>
+        <th>ASSUNTO</th>
+        <th>PRIORIDADE</th>
+        <th>STATUS</th>
+        <th>AÇÕES</th>
+    </thead>
+
+    <tbody>
+        {% for ticket in tickets %}
+        <tr>
+            <td>{{ ticket.id }}</td>
+            <td>{{ ticket.created_at.strftime('%d/%m/%Y') }}</td>
+            <td>{{ ticket.client.name }}</td>
+            <td>{{ ticket.subject }}</td>
+            <td>
+                {% if ticket.priority == 'alta' %}
+                    <span class="badge badge-danger">Alta</span>
+                {% elif ticket.priority == 'baixa' %}
+                    <span class="badge badge-ok">Baixa</span>
+                {% else %}
+                    <span class="badge badge-warning">Média</span>
+                {% endif %}
+            </td>
+            <td>{{ ticket.status }}</td>
+            <td class="actions">
+                <a class="btn btn-small" href="/support/{{ ticket.id }}/edit">Editar</a>
+                <form method="POST" action="/support/{{ ticket.id }}/delete" class="inline-form">
+                    <button class="btn btn-small btn-danger" type="submit" onclick="return confirm('Excluir chamado?')">Excluir</button>
+                </form>
+            </td>
+        </tr>
+        {% else %}
+        <tr>
+            <td colspan="7" class="empty">Nenhum chamado aberto ainda.</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
 {% endblock %}

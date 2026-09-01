@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+
+{% block title %}
+{{ 'Editar Funcionário' if employee else 'Novo Funcionário' }}
+{% endblock %}
+
+{% block content %}
+<h2>{{ 'Editar Funcionário' if employee else 'Novo Funcionário' }}</h2>
+
+<form method="POST" class="form">
+    <label>Nome</label>
+    <input name="name" placeholder="nome" value="{{ employee.name if employee else '' }}" required>
+
+    <label>CPF</label>
+    <input name="cpf" placeholder="cpf" value="{{ employee.cpf if employee else '' }}" required>
+
+    <label>Cargo</label>
+    <input name="position" placeholder="cargo" value="{{ employee.position if employee else '' }}">
+
+    <label>Telefone</label>
+    <input name="phone" placeholder="telefone" value="{{ employee.phone if employee else '' }}">
+
+    <label>Email</label>
+    <input name="email" placeholder="email" value="{{ employee.email if employee else '' }}">
+
+    <label>Salário (R$)</label>
+    <input type="number" step="0.01" name="salary" placeholder="0.00" value="{{ employee.salary if employee else '' }}">
+
+    <label>Data de contratação</label>
+    <input type="date" name="hire_date" value="{{ employee.hire_date.strftime('%Y-%m-%d') if employee and employee.hire_date else '' }}">
+
+    <div class="form-actions">
+        <button class="btn" type="submit">Salvar</button>
+        <a class="btn btn-secondary" href="/employees">Cancelar</a>
+    </div>
+</form>
+
+{% endblock %}
