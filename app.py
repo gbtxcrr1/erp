@@ -302,6 +302,21 @@ def new_sale():
             total_price=total,
         )
         db.session.add(sale)
+
+        client = Client.query.get(request.form["client_id"])
+        client_name = client.name if client else f"ID #{request.form['client_id']}"
+
+        finance_input = FinancialTransaction(
+            type="receita",                                                 # Mapeia seu campo 'type'
+            description=f"{product.name} vendido para {client_name}",     # Mapeia seu campo 'description'
+            amount=total,                                                   # Mapeia seu campo 'amount' (Float)
+            category=product.category,                                              # Mapeia seu campo 'category'
+            # O campo 'date' não precisa enviar, ele usa o default=datetime.utcnow automaticamente!
+        )
+        
+        # 3. Adiciona na sessão para salvar junto com a venda no commit seguinte
+        db.session.add(finance_input)
+
         db.session.commit()
         flash("Venda registrada!")
         return redirect(url_for("sales"))
