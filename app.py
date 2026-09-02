@@ -2,7 +2,8 @@ from functools import wraps
 from flask import Flask, render_template
 from flask import request, redirect, url_for, flash, session, g
 from flask_migrate import Migrate
-from datetime import datetime, timedelta
+from datetime import datetime
+import requests
 
 from config import Config
 from models import (
@@ -15,6 +16,26 @@ app.config.from_object(Config)
 
 db.init_app(app)
 migrate = Migrate(app, db)
+
+# ===================== HORARIO =========================
+def get_time_from_web(timezone="America/Sao_Paulo"):
+    url = f"http://worldtimeapi.org{timezone}"
+
+    try:
+        response = requests.get(url, timeout=5)
+        response.raise_for_status()
+        data = response.json()
+
+        datetime_str = data["datetime"]
+
+        web_datetime = datetime.fromisoformat(datetime_str[:19])
+
+        return web_datetime
+
+    except requests.RequestException as error:
+        print(f"Web Time API error: {error}")
+        return datetime.now()
+
 
 
 # ===================== CONTROLE DE ACESSO (LOGIN) =====================
@@ -311,7 +332,7 @@ def new_sale():
             description=f"{product.name} vendido para {client_name}",     # Mapeia seu campo 'description'
             amount=total,                                                   # Mapeia seu campo 'amount' (Float)
             category=product.category,                                              # Mapeia seu campo 'category'
-            # O campo 'date' não precisa enviar, ele usa o default=datetime.utcnow automaticamente!
+            date=get_time_from_web()
         )
         
         # 3. Adiciona na sessão para salvar junto com a venda no commit seguinte
@@ -359,6 +380,7 @@ def new_transaction():
             description=request.form["description"],
             amount=float(request.form["amount"] or 0),
             category=request.form["category"],
+            date=request.form["date"]
         )
         db.session.add(transaction)
         db.session.commit()
