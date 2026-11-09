@@ -5,7 +5,140 @@ Início
 {% endblock %}
 
 {% block content %}
-<h2>Página inicial</h2>
 
-<p>Bem-vindo ao ERP.</p>
+<h2>Painel de Controle</h2>
+
+<div class="summary">
+
+    <div class="summary-card">
+        <span class="summary-label">Receitas</span>
+        <span class="summary-value revenue">
+            R$ {{ '%.2f'|format(total_revenue) }}
+        </span>
+    </div>
+
+    <div class="summary-card">
+        <span class="summary-label">Despesas</span>
+        <span class="summary-value expense">
+            R$ {{ '%.2f'|format(total_expense) }}
+        </span>
+    </div>
+
+    <div class="summary-card">
+        <span class="summary-label">Saldo</span>
+        <span class="summary-value {{ 'revenue' if balance >= 0 else 'expense' }}">
+            R$ {{ '%.2f'|format(balance) }}
+        </span>
+    </div>
+
+    <div class="summary-card">
+        <span class="summary-label">Produtos cadastrados</span>
+        <span class="summary-value">
+            {{ total_products }}
+        </span>
+    </div>
+
+</div>
+
+
+<div class="dashboard-section">
+    <div class="dashboard-section-header">
+        <div>
+            <h3>Visão Financeira</h3>
+            <p>Receitas e despesas dos últimos meses</p>
+        </div>
+    </div>
+
+    <div class="chart-container">
+        <canvas id="financialChart"></canvas>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script>
+    const chartData = {{ chart_data | tojson }};
+
+    new Chart(document.getElementById("financialChart"), {
+        type: "bar",
+        data: {
+            labels: chartData.map(item => item.month),
+            datasets: [
+                {
+                    label: "Receitas",
+                    data: chartData.map(item => item.revenue),
+                    backgroundColor: "#86c9a5",
+                    borderRadius: 6,
+                    barPercentage: 0.65
+                },
+                {
+                    label: "Despesas",
+                    data: chartData.map(item => item.expenses),
+                    backgroundColor: "#e9a1a1",
+                    borderRadius: 6,
+                    barPercentage: 0.65
+                }
+            ]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: "top",
+                    align: "end",
+                    labels: {
+                        usePointStyle: true,
+                        pointStyle: "circle",
+                        boxWidth: 8,
+                        padding: 20
+                    }
+                },
+                tooltip: {
+                    backgroundColor: "#ffffff",
+                    titleColor: "#333333",
+                    bodyColor: "#555555",
+                    borderColor: "#eeeeee",
+                    borderWidth: 1,
+                    padding: 12,
+                    displayColors: true,
+                    callbacks: {
+                        label: function(context) {
+                            return context.dataset.label + ": " +
+                                context.parsed.y.toLocaleString("pt-BR", {
+                                    style: "currency",
+                                    currency: "BRL"
+                                });
+                        }
+                    }
+                }
+            },
+            scales: {
+                x: {
+                    grid: {
+                        display: false
+                    },
+                    border: {
+                        display: false
+                    }
+                },
+                y: {
+                    beginAtZero: true,
+                    grid: {
+                        color: "#f0f0f0"
+                    },
+                    border: {
+                        display: false
+                    },
+                    ticks: {
+                        callback: function(value) {
+                            return "R$ " + value.toLocaleString("pt-BR");
+                        }
+                    }
+                }
+            }
+        }
+    });
+</script>
+
 {% endblock %}

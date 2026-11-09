@@ -2,11 +2,17 @@ from functools import wraps
 from flask import Flask, render_template
 from flask import request, redirect, url_for, flash, session, g
 from flask_migrate import Migrate
+from sqlalchemy import func
 from datetime import datetime, timedelta
+from zoneinfo import ZoneInfo
+from translations import MOVEMENT_TYPES, MOVEMENT_DIRECTIONS
+
+BRAZIL_TZ = ZoneInfo("America/Sao_Paulo")
+UTC = ZoneInfo("UTC")
 
 from config import Config
 from models import (
-    db, Client, Product, StockItem, Sale,
+    db, Client, Product, StockItem, StockMovement, Sale, Purchase,
     FinancialTransaction, SupportTicket, Employee, User
 )
 
@@ -17,7 +23,7 @@ db.init_app(app)
 migrate = Migrate(app, db)
 
 
-# ===================== CONTROLE DE ACESSO (LOGIN) =====================
+# ===================== LOGIN =====================
 def login_required(view):
     @wraps(view)
     def wrapped_view(*args, **kwargs):
@@ -68,7 +74,6 @@ def login():
                 flash("Usuário ou senha incorretos.")
             return render_template("login.html")
 
-        # login bem-sucedido: limpa tentativas e bloqueio
         user.failed_attempts = 0
         user.locked_until = None
         db.session.commit()
@@ -90,10 +95,73 @@ def logout():
 @app.route("/")
 @login_required
 def home():
-    return render_template("index.html")
+    total_revenue = db.session.query(
+        func.sum(FinancialTransaction.amount)
+    ).filter_by(type="receita").scalar() or 0
+
+    total_expense = db.session.query(
+        func.sum(FinancialTransaction.amount)
+    ).filter_by(type="despesa").scalar() or 0
+
+    balance = total_revenue - total_expense
+    total_products = Product.query.count()
 
 
-# ===================== CLIENTES =====================
+    # Monthly financial data
+    month_names = [
+        "Jan", "Fev", "Mar", "Abr", "Mai", "Jun",
+        "Jul", "Ago", "Set", "Out", "Nov", "Dez"
+    ]
+
+    now = datetime.utcnow()
+    months = {}
+
+    for offset in range(5, -1, -1):
+        month_index = now.month - offset
+        year = now.year
+
+        while month_index <= 0:
+            month_index += 12
+            year -= 1
+
+        key = f"{year}-{month_index:02d}"
+
+        months[key] = {
+            "month": month_names[month_index - 1],
+            "revenue": 0,
+            "expenses": 0
+        }
+
+    monthly_data = db.session.query(
+        func.strftime("%Y-%m", FinancialTransaction.date).label("month"),
+        FinancialTransaction.type,
+        func.sum(FinancialTransaction.amount).label("total")
+    ).group_by(
+        "month",
+        FinancialTransaction.type
+    ).all()
+
+    for month, transaction_type, total in monthly_data:
+        if month in months:
+            if transaction_type == "receita":
+                months[month]["revenue"] = float(total)
+            elif transaction_type == "despesa":
+                months[month]["expenses"] = float(total)
+
+    chart_data = list(months.values())
+
+    return render_template(
+        "index.html",
+        total_revenue=total_revenue,
+        total_expense=total_expense,
+        balance=balance,
+        total_products=total_products,
+        chart_data=chart_data
+    )
+
+
+
+# ===================== CLIENTS =====================
 @app.route("/clients")
 @login_required
 def clients():
@@ -151,7 +219,7 @@ def delete_client(client_id):
     return redirect(url_for("clients"))
 
 
-# ===================== PRODUTOS =====================
+# ===================== PRODUCTS =====================
 @app.route("/products")
 @login_required
 def products():
@@ -209,12 +277,22 @@ def delete_product(product_id):
     return redirect(url_for("products"))
 
 
-# ===================== ESTOQUE =====================
+# ===================== STOCK =====================
 @app.route("/stock")
 @login_required
 def stock():
     items = StockItem.query.all()
-    return render_template("stock.html", items=items)
+    movements = StockMovement.query.all()
+    for movement in movements:
+        if movement.date:
+            movement.date = movement.date.replace(tzinfo=UTC).astimezone(BRAZIL_TZ)
+    return render_template(
+        "stock.html",
+        items=items, 
+        movements=movements, 
+        movement_types=MOVEMENT_TYPES,
+        movement_directions=MOVEMENT_DIRECTIONS
+    )
 
 
 @app.route("/stock/new", methods=["GET", "POST"])
@@ -241,18 +319,59 @@ def new_stock():
     return render_template("new_stock.html", products=products)
 
 
+
+
 @app.route("/stock/<int:item_id>/edit", methods=["GET", "POST"])
 @login_required
 def edit_stock(item_id):
     item = StockItem.query.get_or_404(item_id)
+
     if request.method == "POST":
-        item.quantity = int(request.form["quantity"])
-        item.min_quantity = int(request.form["min_quantity"] or 0)
+        old_quantity = item.quantity
+
+        try:
+            new_quantity = int(request.form["quantity"])
+            min_quantity = int(request.form["min_quantity"] or 0)
+        except ValueError:
+            flash("Informe quantidades válidas.")
+            return render_template(
+                "new_stock.html",
+                products=Product.query.all(),
+                item=item
+            )
+
+        if new_quantity < 0 or min_quantity < 0:
+            flash("As quantidades não podem ser negativas.")
+            return render_template(
+                "new_stock.html",
+                products=Product.query.all(),
+                item=item
+            )
+
+        if old_quantity != new_quantity:
+            movement = StockMovement(
+                product_id=item.product_id,
+                user_id=g.user.id,
+                movement_type="adjustment",
+                direction="in" if new_quantity > old_quantity else "out",
+                quantity=abs(new_quantity - old_quantity)
+            )
+            db.session.add(movement)
+
+        item.quantity = new_quantity
+        item.min_quantity = min_quantity
         item.location = request.form["location"]
+
         db.session.commit()
         flash("Estoque atualizado!")
         return redirect(url_for("stock"))
-    return render_template("new_stock.html", products=Product.query.all(), item=item)
+
+    return render_template(
+        "new_stock.html",
+        products=Product.query.all(),
+        item=item
+    )
+
 
 
 @app.route("/stock/<int:item_id>/delete", methods=["POST"])
@@ -265,11 +384,13 @@ def delete_stock(item_id):
     return redirect(url_for("stock"))
 
 
-# ===================== VENDAS =====================
+# ===================== SALES =====================
 @app.route("/sales")
 @login_required
 def sales():
     sales = Sale.query.order_by(Sale.date.desc()).all()
+    for sale in sales:
+        sale.date = sale.date.replace(tzinfo=UTC).astimezone(BRAZIL_TZ)
     return render_template("sales.html", sales=sales)
 
 
@@ -292,6 +413,18 @@ def new_sale():
         else:
             flash(f"Estoque insuficiente (disponível: {stock.quantity}).")
             return render_template("new_sale.html", clients=clients, products=products)
+
+        movement = StockMovement(
+            product_id=product.id,
+            employee_id=None,
+            user_id=g.user.id,
+            movement_type='sale',
+            direction='out',
+            quantity=quantity,
+            reason=None
+        )
+
+        db.session.add(movement)
 
         total = product.price * quantity
         sale = Sale(
@@ -333,7 +466,99 @@ def delete_sale(sale_id):
     return redirect(url_for("sales"))
 
 
-# ===================== FINANCEIRO =====================
+
+# ===================== PURCHASES =====================
+
+@app.route("/purchases")
+@login_required
+def purchase_list():
+    purchases = Purchase.query.order_by(
+        Purchase.date.desc()
+    ).all()
+
+    total_purchases = sum(
+        purchase.total_price or 0
+        for purchase in purchases
+    )
+
+    return render_template(
+        "purchases.html",
+        purchases=purchases,
+        total_purchases=total_purchases
+    )
+
+@app.route("/purchases/new", methods=["GET", "POST"])
+@login_required
+def new_purchase():
+    products = Product.query.all()
+
+    if request.method == "POST":
+        product = Product.query.get(request.form["product_id"])
+        quantity = int(request.form["quantity"])
+        unit_price = float(request.form["unit_price"])
+
+        if product is None:
+            flash("Produto não encontrado.")
+            return render_template("new_purchase.html", products=products)
+
+        if quantity <= 0 or unit_price <= 0:
+            flash("Quantidade e preço devem ser maiores que zero.")
+            return render_template("new_purchase.html", products=products)
+
+        total = quantity * unit_price
+
+        # Atualiza estoque
+        stock = StockItem.query.filter_by(product_id=product.id).first()
+
+        if stock:
+            stock.quantity += quantity
+        else:
+            stock = StockItem(
+                product_id=product.id,
+                quantity=quantity,
+                min_quantity=0
+            )
+            db.session.add(stock)
+
+        # Registra compra
+        purchase = Purchase(
+            product_id=product.id,
+            user_id=g.user.id,
+            quantity=quantity,
+            unit_price=unit_price,
+            total_price=total
+        )
+        db.session.add(purchase)
+
+        # Registra movimentação de estoque
+        movement = StockMovement(
+            product_id=product.id,
+            user_id=g.user.id,
+            movement_type="purchase",
+            direction="in",
+            quantity=quantity
+        )
+        db.session.add(movement)
+
+        # Registra despesa financeira
+        finance_input = FinancialTransaction(
+            type="despesa",
+            description=f"Compra de {quantity} unidade(s) de {product.name}",
+            amount=total,
+            category=product.category
+        )
+        db.session.add(finance_input)
+
+        db.session.commit()
+
+        flash("Compra registrada com sucesso!")
+        return redirect(url_for("purchase_list"))
+
+    return render_template("new_purchase.html", products=products)
+
+
+
+# ===================== FINANCE =====================
 @app.route("/finance")
 @login_required
 def finance():
@@ -341,6 +566,8 @@ def finance():
     total_revenue = sum(t.amount for t in transactions if t.type == "receita")
     total_expense = sum(t.amount for t in transactions if t.type == "despesa")
     balance = total_revenue - total_expense
+    for transaction in transactions:
+        transaction.date = transaction.date.replace(tzinfo=UTC).astimezone(BRAZIL_TZ)
     return render_template(
         "finance.html",
         transactions=transactions,
@@ -377,7 +604,7 @@ def delete_transaction(transaction_id):
     return redirect(url_for("finance"))
 
 
-# ===================== SUPORTE =====================
+# ===================== SUPPORT =====================
 @app.route("/support")
 @login_required
 def support():
@@ -429,7 +656,7 @@ def delete_ticket(ticket_id):
     return redirect(url_for("support"))
 
 
-# ===================== FUNCIONÁRIOS =====================
+# ===================== EMPLOYEES =====================
 @app.route("/employees")
 @login_required
 def employees():

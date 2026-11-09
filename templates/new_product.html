@@ -17,9 +17,33 @@
     <label>Preço</label>
     <input type="number" step="0.01" name="price" placeholder="0.00" value="{{ product.price if product else '' }}" required>
 
-    <label>Categoria</label>
-    <input name="category" placeholder="categoria" value="{{ product.category if product else '' }}">
 
+	<label>Categoria</label>
+	<select name="category" required>
+	    <option value="" disabled {% if not product %}selected{% endif %}>
+	        Selecione uma categoria
+	    </option>
+
+	    {% for category in [
+	        'Smartphones',
+	        'Computadores',
+	        'Tablets',
+	        'Periféricos',
+	        'Componentes',
+	        'Monitores',
+	        'Áudio',
+	        'Acessórios',
+	        'Redes',
+	        'Armazenamento',
+	        'Outros'
+	    ] %}
+	        <option value="{{ category }}"
+	            {% if product and product.category == category %}selected{% endif %}>
+	            {{ category }}
+	        </option>
+	    {% endfor %}
+	</select>
+	
     <label>SKU</label>
     <input name="sku" placeholder="código" value="{{ product.sku if product else '' }}">
 

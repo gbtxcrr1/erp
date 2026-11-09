@@ -9,25 +9,50 @@
 
 <body>
     {% if g.user %}
-    <nav>
-        <a href="/" class="brand">
+    <aside class="sidebar">
+        <div class="sidebar-brand">
             <img src="{{ url_for('static', filename='img/logo.png') }}" alt="Logo" class="brand-logo">
-        </a>
-        <a href="/" class="{{ 'active' if request.path == '/' }}">Início</a>
-        <a href="/clients" class="{{ 'active' if request.path.startswith('/clients') }}">Clientes</a>
-        <a href="/products" class="{{ 'active' if request.path.startswith('/products') }}">Produtos</a>
-        <a href="/sales" class="{{ 'active' if request.path.startswith('/sales') }}">Vendas</a>
-        <a href="/stock" class="{{ 'active' if request.path.startswith('/stock') }}">Estoque</a>
-        <a href="/finance" class="{{ 'active' if request.path.startswith('/finance') }}">Financeiro</a>
-        <a href="/support" class="{{ 'active' if request.path.startswith('/support') }}">Suporte</a>
-        <a href="/employees" class="{{ 'active' if request.path.startswith('/employees') }}">Funcionários</a>
-        <span class="nav-user">Olá, {{ g.user.username }}</span>
-        <a class="btn btn-logout" href="/logout">Sair</a>
-    </nav>
-    <hr>
+        </div>
+
+        <div class="sidebar-section">
+            <span class="sidebar-label">GERAL</span>
+            <a href="/" class="{{ 'active' if request.path == '/' }}">Início</a>
+        </div>
+
+        <div class="sidebar-section">
+            <span class="sidebar-label">GESTÃO</span>
+            <a href="/clients" class="{{ 'active' if request.path.startswith('/clients') }}">Clientes</a>
+            <a href="/products" class="{{ 'active' if request.path.startswith('/products') }}">Produtos</a>
+            <a href="/employees" class="{{ 'active' if request.path.startswith('/employees') }}">Funcionários</a>
+        </div>
+
+        <div class="sidebar-section">
+            <span class="sidebar-label">OPERAÇÕES</span>
+            <a href="/sales" class="{{ 'active' if request.path.startswith('/sales') }}">Vendas</a>
+            <a href="/purchases" class="{{ 'active' if request.path.startswith('/purchases') }}">Compras</a>
+            <a href="/stock" class="{{ 'active' if request.path.startswith('/stock') }}">Estoque</a>
+        </div>
+
+        <div class="sidebar-section">
+            <span class="sidebar-label">ADMINISTRAÇÃO</span>
+            <a href="/finance" class="{{ 'active' if request.path.startswith('/finance') }}">Financeiro</a>
+            <a href="/support" class="{{ 'active' if request.path.startswith('/support') }}">Suporte</a>
+        </div>
+
+        <div class="sidebar-bottom">
+            <button type="button" id="theme-toggle" class="theme-toggle">
+                🌙 Tema escuro
+            </button>
+
+            <div class="sidebar-user">
+                <span>{{ g.user.username }}</span>
+                <a href="/logout">Sair</a>
+            </div>
+        </div>
+    </aside>
     {% endif %}
 
-    <div class="container">
+    <main class="{{ 'main-content' if g.user else 'container' }}">
         {% with messages = get_flashed_messages() %}
             {% if messages %}
                 <div class="flash">
@@ -39,7 +64,33 @@
         {% endwith %}
 
         {% block content %}{% endblock %}
-    </div>
+    </main>
 
+    <script>
+        const themeToggle = document.getElementById("theme-toggle");
+
+        function applyTheme(theme) {
+            document.body.classList.toggle("dark-mode", theme === "dark");
+
+            if (themeToggle) {
+                themeToggle.textContent =
+                    theme === "dark" ? "☀️ Tema claro" : "🌙 Tema escuro";
+            }
+        }
+
+        const savedTheme = localStorage.getItem("theme") || "light";
+        applyTheme(savedTheme);
+
+        if (themeToggle) {
+            themeToggle.addEventListener("click", function() {
+                const newTheme = document.body.classList.contains("dark-mode")
+                    ? "light"
+                    : "dark";
+
+                localStorage.setItem("theme", newTheme);
+                applyTheme(newTheme);
+            });
+        }
+    </script>
 </body>
 </html>

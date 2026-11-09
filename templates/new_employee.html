@@ -14,8 +14,13 @@
     <label>CPF</label>
     <input name="cpf" placeholder="cpf" value="{{ employee.cpf if employee else '' }}" required>
 
-    <label>Cargo</label>
-    <input name="position" placeholder="cargo" value="{{ employee.position if employee else '' }}">
+	<label for="role">Cargo</label>
+	<select name="role" id="role" required>
+	    <option value="">Selecione...</option>
+	    <option value="employee">Funcionário</option>
+	    <option value="manager">Gerente</option>
+	    <option value="admin">Administrador</option>
+	</select>
 
     <label>Telefone</label>
     <input name="phone" placeholder="telefone" value="{{ employee.phone if employee else '' }}">

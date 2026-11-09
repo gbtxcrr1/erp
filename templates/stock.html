@@ -55,4 +55,56 @@ Estoque
     </tbody>
 </table>
 
+<h2>Histórico de Movimentações</h2>
+
+<table>
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>PRODUTO</th>
+            <th>TIPO</th>
+            <th>DIREÇÃO</th>
+            <th>QUANTIDADE</th>
+            <th>DATA</th>
+            <th>FUNCIONÁRIO</th>
+        </tr>
+    </thead>
+
+    <tbody>
+        {% for movement in movements %}
+        <tr>
+            <td>{{ movement.id }}</td>
+            <td>{{ movement.product.name }}</td>
+			<td>
+			    {% if movement.movement_type == "purchase" %}
+			        <span class="badge badge-ok">Compra</span>
+			    {% elif movement.movement_type == "sale" %}
+			        <span class="badge badge-danger">Venda</span>
+			    {% elif movement.movement_type == "adjustment" %}
+			        <span class="badge badge-warning">Ajuste</span>
+			    {% elif movement.movement_type == "return" %}
+			        <span class="badge badge-info">Devolução</span>
+			    {% else %}
+			        <span class="badge">{{ movement.movement_type }}</span>
+			    {% endif %}
+			</td>
+            <td>
+                {% if movement.direction == "in" %}
+                    <span class="badge badge-ok">Entrada</span>
+                {% else %}
+                    <span class="badge badge-danger">Saída</span>
+                {% endif %}
+            </td>
+            <td>{{ movement.quantity }}</td>
+            <td>{{ movement.date.strftime('%d/%m/%Y %H:%M') if movement.date else '-' }}</td>
+            <td>{{ movement.employee.name if movement.employee else '-' }}</td>
+        </tr>
+        {% else %}
+        <tr>
+            <td colspan="7" class="empty">Nenhuma movimentação registrada.</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
 {% endblock %}

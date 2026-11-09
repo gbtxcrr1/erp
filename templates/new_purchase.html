@@ -1,0 +1,51 @@
+```html
+{% extends "base.html" %}
+
+{% block title %}
+Nova Compra
+{% endblock %}
+
+{% block content %}
+
+<h2>Nova Compra</h2>
+
+<form method="POST" class="form">
+
+    <label>Produto</label>
+    <select name="product_id" required>
+        <option value="" disabled selected>Selecione um produto</option>
+        {% for product in products %}
+            <option value="{{ product.id }}">
+                {{ product.name }}
+            </option>
+        {% endfor %}
+    </select>
+
+    <label>Quantidade</label>
+    <input
+        type="number"
+        name="quantity"
+        min="1"
+        placeholder="Quantidade"
+        required
+    >
+
+    <label>Preço de Compra Unitário (R$)</label>
+    <input
+        type="number"
+        name="unit_price"
+        step="0.01"
+        min="0.01"
+        placeholder="0.00"
+        required
+    >
+
+    <div class="form-actions">
+        <button class="btn" type="submit">Registrar Compra</button>
+        <a class="btn btn-secondary" href="/purchases">Cancelar</a>
+    </div>
+
+</form>
+
+{% endblock %}
+```

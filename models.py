@@ -4,11 +4,12 @@ from datetime import datetime
 db = SQLAlchemy()
 
 
-# ===================== USUÁRIOS (LOGIN) =====================
+# ===================== LOGIN =====================
 class User(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(100), unique=True, nullable=False)
     password_hash = db.Column(db.String(200), nullable=False)
+    role = db.Column(db.String(30), nullable=False, default="employee")
     # controle de tentativas de login
     failed_attempts = db.Column(db.Integer, default=0)
     locked_until = db.Column(db.DateTime, nullable=True)
@@ -33,7 +34,7 @@ class User(db.Model):
         return f"<Usuário {self.username}>"
 
 
-# ===================== CLIENTES =====================
+# ===================== CLIENTS =====================
 class Client(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(100), nullable=False)
@@ -49,7 +50,7 @@ class Client(db.Model):
         return f"<Cliente {self.name}>"
 
 
-# ===================== PRODUTOS =====================
+# ===================== PRODUCTS =====================
 class Product(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(150), nullable=False)
@@ -63,7 +64,7 @@ class Product(db.Model):
         return f"<Produto {self.name}>"
 
 
-# ===================== ESTOQUE =====================
+# ===================== STOCK =====================
 class StockItem(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     product_id = db.Column(db.Integer, db.ForeignKey('product.id'), nullable=False)
@@ -77,8 +78,44 @@ class StockItem(db.Model):
     def __repr__(self):
         return f"<Estoque {self.product.name}>"
 
+# ======================= STOCK MOVEMENT ==========================
+class StockMovement(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
 
-# ===================== VENDAS =====================
+    product_id = db.Column(
+        db.Integer,
+        db.ForeignKey('product.id'),
+        nullable=False
+    )
+
+    employee_id = db.Column(
+        db.Integer,
+        db.ForeignKey('employee.id'),
+        nullable=True
+    )
+
+    user_id = db.Column(
+        db.Integer,
+        db.ForeignKey('user.id'),
+        nullable=True
+    )
+
+    movement_type = db.Column(db.String(20), nullable=False)
+    direction = db.Column(db.String(10), nullable=False)
+    quantity = db.Column(db.Integer, nullable=False)
+
+    date = db.Column(db.DateTime, default=datetime.utcnow)
+    reason = db.Column(db.String(255), nullable=True)
+
+    product = db.relationship('Product')
+    employee = db.relationship('Employee')
+    user = db.relationship('User')
+
+    def __repr__(self):
+        return f"<StockMovement {self.movement_type}: {self.quantity}>"
+    
+
+# ===================== SALES =====================
 class Sale(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     client_id = db.Column(db.Integer, db.ForeignKey('client.id'), nullable=False)
@@ -94,8 +131,26 @@ class Sale(db.Model):
     def __repr__(self):
         return f"<Venda #{self.id}>"
 
+# ====================== PURCHASES =====================
 
-# ===================== FINANCEIRO =====================
+class Purchase(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    product_id = db.Column(db.Integer, db.ForeignKey('product.id'), nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=True)
+    quantity = db.Column(db.Integer, nullable=False)
+    unit_price = db.Column(db.Float, nullable=False)
+    total_price = db.Column(db.Float, nullable=False)
+    date = db.Column(db.DateTime, default=datetime.utcnow)
+
+    product = db.relationship('Product')
+    user = db.relationship('User')
+
+    def __repr__(self):
+        return f"<Purchase {self.id}: {self.quantity} units>"
+
+
+
+# ===================== FINANCE =====================
 class FinancialTransaction(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     type = db.Column(db.String(20), nullable=False)  # 'receita' ou 'despesa'
@@ -108,7 +163,7 @@ class FinancialTransaction(db.Model):
         return f"<{self.type} {self.description}>"
 
 
-# ===================== SUPORTE =====================
+# ===================== SUPPORT =====================
 class SupportTicket(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     client_id = db.Column(db.Integer, db.ForeignKey('client.id'), nullable=False)
@@ -125,9 +180,10 @@ class SupportTicket(db.Model):
         return f"<Chamado #{self.id} - {self.subject}>"
 
 
-# ===================== FUNCIONÁRIOS =====================
+# ===================== EMPLOYEES =====================
 class Employee(db.Model):
     id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey("user.id"), unique=True, nullable=True)
     name = db.Column(db.String(100), nullable=False)
     cpf = db.Column(db.String(11), unique=True, nullable=False)
     position = db.Column(db.String(100))

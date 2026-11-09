@@ -1,0 +1,70 @@
+{% extends "base.html" %}
+
+{% block title %}
+Compras
+{% endblock %}
+
+{% block content %}
+
+<h2>Compras</h2>
+
+<div class="summary">
+    <div class="summary-card">
+        <span class="summary-label">Total de Compras</span>
+        <span class="summary-value">{{ purchases|length }}</span>
+    </div>
+
+    <div class="summary-card">
+        <span class="summary-label">Valor Total</span>
+        <span class="summary-value">
+            R$ {{ '%.2f'|format(total_purchases) }}
+        </span>
+    </div>
+</div>
+
+<div class="top-bar">
+    <a class="btn" href="/purchases/new">Nova Compra</a>
+</div>
+
+<table>
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>FORNECEDOR</th>
+            <th>PRODUTO</th>
+            <th>QUANTIDADE</th>
+            <th>PREÇO UNITÁRIO</th>
+            <th>VALOR TOTAL</th>
+            <th>DATA</th>
+            <th>AÇÕES</th>
+        </tr>
+    </thead>
+
+    <tbody>
+        {% for purchase in purchases %}
+        <tr>
+            <td>{{ purchase.id }}</td>
+            <td>{{ purchase.supplier.name if purchase.supplier else '-' }}</td>
+            <td>{{ purchase.product.name }}</td>
+            <td>{{ purchase.quantity }}</td>
+            <td>R$ {{ '%.2f'|format(purchase.unit_price) }}</td>
+            <td>R$ {{ '%.2f'|format(purchase.total_price) }}</td>
+            <td>{{ purchase.date.strftime('%d/%m/%Y %H:%M') if purchase.date else '-' }}</td>
+            <td class="actions">
+                <a class="btn btn-small" href="/purchases/{{ purchase.id }}">
+                    Detalhes
+                </a>
+            </td>
+        </tr>
+
+        {% else %}
+        <tr>
+            <td colspan="8" class="empty">
+                Nenhuma compra registrada ainda.
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+{% endblock %}
