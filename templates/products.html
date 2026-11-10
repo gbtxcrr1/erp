@@ -1,3 +1,4 @@
+
 {% extends "base.html" %}
 
 {% block title %}
@@ -10,17 +11,20 @@ Produtos
 
 <div class="top-bar">
     <a class="btn" href="/products/new">Novo Produto</a>
+    <a class="btn btn-secondary" href="/products/inactive">Produtos Inativos</a>
 </div>
 
 <table>
     <thead>
-        <th>ID</th>
-        <th>NOME</th>
-        <th>DESCRIÇÃO</th>
-        <th>CATEGORIA</th>
-        <th>SKU</th>
-        <th>PREÇO</th>
-        <th>AÇÕES</th>
+        <tr>
+            <th>ID</th>
+            <th>NOME</th>
+            <th>DESCRIÇÃO</th>
+            <th>CATEGORIA</th>
+            <th>SKU</th>
+            <th>PREÇO</th>
+            <th>AÇÕES</th>
+        </tr>
     </thead>
 
     <tbody>
@@ -35,7 +39,17 @@ Produtos
             <td class="actions">
                 <a class="btn btn-small" href="/products/{{ product.id }}/edit">Editar</a>
                 <form method="POST" action="/products/{{ product.id }}/delete" class="inline-form">
-                    <button class="btn btn-small btn-danger" type="submit" onclick="return confirm('Excluir este produto?')">Excluir</button>
+                    {% if product.id in products_with_history %}
+                        <button class="btn btn-small btn-danger" type="submit"
+                            onclick="return confirm('Deseja realmente desativar este produto?')">
+                            Desativar
+                        </button>
+                    {% else %}
+                        <button class="btn btn-small btn-danger" type="submit"
+                            onclick="return confirm('Deseja realmente excluir este produto?')">
+                            Excluir
+                        </button>
+                    {% endif %}
                 </form>
             </td>
         </tr>

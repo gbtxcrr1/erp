@@ -129,13 +129,12 @@ td.empty {
     background: #565e64;
 }
 
-/* "Excluir" — usa azul em vez de vermelho, conforme pedido */
 .btn-danger {
-    background: #3769b5;
+    background: #c74747;
 }
 
 .btn-danger:hover {
-    background: #274d8a;
+    background: #a83232;
 }
 
 .top-bar {
@@ -201,6 +200,7 @@ td.empty {
 }
 
 /* ===== Badges ===== */
+
 .badge {
     padding: 4px 9px;
     border-radius: 12px;
@@ -213,14 +213,29 @@ td.empty {
     background: #2d8f5a;
 }
 
-.badge-warning {
-    background: #cf9d1e;
-    color: white;
+.badge-danger {
+    background: #c74747;
 }
 
-/* "Esgotado"/ruim — azul escuro em vez de vermelho */
-.badge-danger {
+.badge-warning {
+    background: #cf9d1e;
+    color: #222;
+}
+
+.badge-type {
     background: #2b5a9e;
+}
+
+.badge-info {
+    background: #64748b;
+}
+
+.badge-purchase {
+    background: #2878bd;
+}
+
+.badge-sale {
+    background: #9b59b6;
 }
 
 /* ===== Resumo financeiro ===== */
@@ -301,18 +316,41 @@ td.empty {
     margin-top: 25px;
 }
 
-.theme-toggle {
-    background: transparent;
-    border: 1px solid #ddd;
+.theme-selector {
+    display: flex;
+    gap: 8px;
+    padding: 5px;
+    background: rgba(255, 255, 255, 0.08);
     border-radius: 8px;
-    padding: 7px 10px;
+    margin-bottom: 15px;
+}
+
+.theme-selector button {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 9px;
+    border: none;
+    border-radius: 6px;
+    background: transparent;
+    color: #cbd5e1;
     cursor: pointer;
-    font-size: 17px;
     transition: background 0.2s;
 }
 
-.theme-toggle:hover {
-    background: #f0f0f0;
+.theme-selector button.selected {
+    background: #ffffff;
+    color: #123a6b;
+}
+
+.theme-selector button:hover:not(.selected) {
+    background: rgba(255, 255, 255, 0.12);
+}
+
+.theme-selector svg {
+    width: 18px;
+    height: 18px;
 }
 
 
@@ -524,45 +562,130 @@ body.dark-mode .sidebar-section a.active {
     color: white;
 }
 
-/* Responsive */
-@media (max-width: 768px) {
-    .sidebar {
-        width: 190px;
-    }
+/* ===== COLLAPSIBLE SIDEBAR ===== */
 
-    .main-content {
-        margin-left: 190px;
-        padding: 18px;
-    }
+.sidebar,
+.main-content {
+    transition: width 0.25s ease, margin-left 0.25s ease;
 }
 
-@media (max-width: 480px) {
-    .sidebar {
-        width: 65px;
-        padding: 15px 6px;
-    }
+.sidebar {
+    width: 240px;
+}
 
-    .sidebar-brand span,
-    .sidebar-label,
-    .sidebar-section a,
-    .sidebar-user,
-    .sidebar .theme-toggle {
-        font-size: 0;
-    }
+.sidebar-brand {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 12px;
+    margin-bottom: 35px;
+    padding: 0 5px;
+}
 
-    .sidebar-brand {
-        justify-content: center;
-        padding: 0;
-    }
+.sidebar-brand .brand-logo {
+    height: 38px;
+    width: auto;
+    max-width: 150px;
+    object-fit: contain;
+}
 
-    .sidebar-section a {
-        display: block;
-        height: 20px;
-        overflow: hidden;
-    }
+.sidebar-brand #sidebar-toggle {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 34px;
+    height: 34px;
+    flex-shrink: 0;
+    background: transparent;
+    border: 1px solid rgba(255,255,255,0.2);
+    border-radius: 7px;
+    color: white;
+    cursor: pointer;
+    transition: background 0.2s;
+}
 
-    .main-content {
-        margin-left: 65px;
-        padding: 12px;
-    }
+.sidebar-brand #sidebar-toggle:hover {
+    background: rgba(255,255,255,0.12);
+}
+
+.sidebar.collapsed .sidebar-brand {
+    justify-content: center;
+}
+
+.sidebar.collapsed .sidebar-brand #sidebar-toggle {
+    width: 42px;
+    height: 38px;
+}
+
+.sidebar-section a {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.sidebar-section a svg,
+.sidebar-user a svg {
+    width: 18px;
+    height: 18px;
+    flex-shrink: 0;
+}
+
+.sidebar-user a {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+/* Collapsed state */
+
+.sidebar.collapsed {
+    width: 76px;
+    padding-left: 10px;
+    padding-right: 10px;
+}
+
+.sidebar.collapsed .brand-logo {
+    display: none;
+}
+
+.sidebar.collapsed .sidebar-brand {
+    justify-content: center;
+}
+
+.sidebar.collapsed .sidebar-label,
+.sidebar.collapsed .sidebar-section a span,
+.sidebar.collapsed .sidebar-user span,
+.sidebar.collapsed .sidebar-user a span {
+    display: none;
+}
+
+.sidebar.collapsed .sidebar-section a {
+    justify-content: center;
+    padding: 12px 0;
+}
+
+.sidebar.collapsed .sidebar-user {
+    justify-content: center;
+}
+
+.sidebar.collapsed .sidebar-user a {
+    font-size: 0;
+}
+
+.main-content.sidebar-collapsed {
+    margin-left: 76px;
+}
+
+.sidebar.collapsed .theme-selector {
+    flex-direction: column;
+    align-items: center;
+    gap: 5px;
+    padding: 5px 0;
+}
+
+.sidebar.collapsed .theme-selector button {
+    width: 42px;
+    height: 38px;
+    flex: none;
+    padding: 8px;
 }

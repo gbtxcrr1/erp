@@ -13,7 +13,7 @@ UTC = ZoneInfo("UTC")
 from config import Config
 from models import (
     db, Client, Product, StockItem, StockMovement, Sale, Purchase,
-    FinancialTransaction, SupportTicket, Employee, User
+    FinancialTransaction, Employee, User
 )
 
 app = Flask(__name__)
@@ -223,29 +223,70 @@ def delete_client(client_id):
 @app.route("/products")
 @login_required
 def products():
-    products = Product.query.all()
-    return render_template("products.html", products=products)
+    products = Product.query.filter_by(active=True).all()
+
+    products_with_history = set()
+
+    for product in products:
+        has_purchases = Purchase.query.filter_by(product_id=product.id).first()
+        has_movements = StockMovement.query.filter_by(product_id=product.id).first()
+
+        if has_purchases or has_movements:
+            products_with_history.add(product.id)
+
+    return render_template(
+        "products.html",
+        products=products,
+        products_with_history=products_with_history
+    )
+
+@app.route("/products/inactive")
+@login_required
+def inactive_products():
+    products = Product.query.filter_by(active=False).all()
+    return render_template("inactive_products.html", products=products)
+
+
+@app.route("/products/<int:product_id>/reactivate", methods=["POST"])
+@login_required
+def reactivate_product(product_id):
+    product = Product.query.get_or_404(product_id)
+
+    product.active = True
+    db.session.commit()
+
+    flash("Produto reativado com sucesso!")
+    return redirect(url_for("inactive_products"))
 
 
 @app.route("/products/new", methods=["GET", "POST"])
 @login_required
 def new_product():
     if request.method == "POST":
+        price = float(request.form["price"] or 0)
+
+        if price < 0:
+            flash("O preço não pode ser negativo.")
+            return render_template("new_product.html")
+
         product = Product(
             name=request.form["name"],
             description=request.form["description"],
-            price=float(request.form["price"] or 0),
+            price=price,
             category=request.form["category"],
             sku=request.form["sku"],
         )
+
         db.session.add(product)
         db.session.flush()
-        # cria um registro de estoque inicial se não existir
+
         if not StockItem.query.filter_by(product_id=product.id).first():
             db.session.add(StockItem(product_id=product.id, quantity=0, location="Geral"))
+
         db.session.commit()
         flash("Produto cadastrado com sucesso!")
         return redirect(url_for("products"))
+
     return render_template("new_product.html")
 
 
@@ -253,15 +294,24 @@ def new_product():
 @login_required
 def edit_product(product_id):
     product = Product.query.get_or_404(product_id)
+
     if request.method == "POST":
+        price = float(request.form["price"] or 0)
+
+        if price < 0:
+            flash("O preço não pode ser negativo.")
+            return render_template("new_product.html", product=product)
+
         product.name = request.form["name"]
         product.description = request.form["description"]
-        product.price = float(request.form["price"] or 0)
+        product.price = price
         product.category = request.form["category"]
         product.sku = request.form["sku"]
+
         db.session.commit()
         flash("Produto atualizado!")
         return redirect(url_for("products"))
+
     return render_template("new_product.html", product=product)
 
 
@@ -269,20 +319,28 @@ def edit_product(product_id):
 @login_required
 def delete_product(product_id):
     product = Product.query.get_or_404(product_id)
-    # remove registros de estoque relacionados
-    StockItem.query.filter_by(product_id=product.id).delete()
-    db.session.delete(product)
-    db.session.commit()
-    flash("Produto removido.")
-    return redirect(url_for("products"))
 
+    has_purchases = Purchase.query.filter_by(product_id=product.id).first()
+    has_movements = StockMovement.query.filter_by(product_id=product.id).first()
+
+    if has_purchases or has_movements:
+        product.active = False
+        db.session.commit()
+        flash("Produto desativado com sucesso!")
+    else:
+        StockItem.query.filter_by(product_id=product.id).delete()
+        db.session.delete(product)
+        db.session.commit()
+        flash("Produto removido com sucesso!")
+
+    return redirect(url_for("products"))
 
 # ===================== STOCK =====================
 @app.route("/stock")
 @login_required
 def stock():
     items = StockItem.query.all()
-    movements = StockMovement.query.all()
+    movements = StockMovement.query.order_by(StockMovement.date.desc()).all()
     for movement in movements:
         if movement.date:
             movement.date = movement.date.replace(tzinfo=UTC).astimezone(BRAZIL_TZ)
@@ -398,9 +456,13 @@ def sales():
 @login_required
 def new_sale():
     clients = Client.query.all()
-    products = Product.query.all()
+    products = Product.query.filter_by(active=True).all()
     if request.method == "POST":
         product = Product.query.get(request.form["product_id"])
+        
+        if product is None or not product.active:
+            flash("Este produto está inativo ou não existe.")
+            return render_template("new_sale.html", clients=clients, products=products)
         quantity = int(request.form["quantity"])
 
         # verifica estoque
@@ -476,6 +538,9 @@ def purchase_list():
         Purchase.date.desc()
     ).all()
 
+    for purchase in purchases:
+        purchase.date = purchase.date.replace(tzinfo=UTC).astimezone(BRAZIL_TZ)
+
     total_purchases = sum(
         purchase.total_price or 0
         for purchase in purchases
@@ -490,10 +555,14 @@ def purchase_list():
 @app.route("/purchases/new", methods=["GET", "POST"])
 @login_required
 def new_purchase():
-    products = Product.query.all()
+    products = Product.query.filter_by(active=True).all()
 
     if request.method == "POST":
         product = Product.query.get(request.form["product_id"])
+        
+        if product is None or not product.active:
+            flash("Este produto está inativo ou não existe.")
+            return render_template("new_purchase.html", products=products)
         quantity = int(request.form["quantity"])
         unit_price = float(request.form["unit_price"])
 
@@ -602,59 +671,6 @@ def delete_transaction(transaction_id):
     db.session.commit()
     flash("Lançamento removido.")
     return redirect(url_for("finance"))
-
-
-# ===================== SUPPORT =====================
-@app.route("/support")
-@login_required
-def support():
-    tickets = SupportTicket.query.order_by(SupportTicket.created_at.desc()).all()
-    return render_template("support.html", tickets=tickets)
-
-
-@app.route("/support/new", methods=["GET", "POST"])
-@login_required
-def new_ticket():
-    clients = Client.query.all()
-    if request.method == "POST":
-        ticket = SupportTicket(
-            client_id=request.form["client_id"],
-            subject=request.form["subject"],
-            description=request.form["description"],
-            priority=request.form["priority"],
-            status=request.form["status"],
-        )
-        db.session.add(ticket)
-        db.session.commit()
-        flash("Chamado aberto!")
-        return redirect(url_for("support"))
-    return render_template("new_ticket.html", clients=clients)
-
-
-@app.route("/support/<int:ticket_id>/edit", methods=["GET", "POST"])
-@login_required
-def edit_ticket(ticket_id):
-    ticket = SupportTicket.query.get_or_404(ticket_id)
-    if request.method == "POST":
-        ticket.subject = request.form["subject"]
-        ticket.description = request.form["description"]
-        ticket.priority = request.form["priority"]
-        ticket.status = request.form["status"]
-        db.session.commit()
-        flash("Chamado atualizado!")
-        return redirect(url_for("support"))
-    return render_template("new_ticket.html", clients=Client.query.all(), ticket=ticket)
-
-
-@app.route("/support/<int:ticket_id>/delete", methods=["POST"])
-@login_required
-def delete_ticket(ticket_id):
-    ticket = SupportTicket.query.get_or_404(ticket_id)
-    db.session.delete(ticket)
-    db.session.commit()
-    flash("Chamado removido.")
-    return redirect(url_for("support"))
-
 
 # ===================== EMPLOYEES =====================
 @app.route("/employees")

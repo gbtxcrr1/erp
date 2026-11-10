@@ -1,0 +1,50 @@
+
+{% extends "base.html" %}
+
+{% block title %}
+Produtos Inativos
+{% endblock %}
+
+{% block content %}
+
+<h2>Produtos Inativos</h2>
+
+<div class="top-bar">
+    <a class="btn btn-secondary" href="/products">Voltar aos Produtos</a>
+</div>
+
+<table>
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>NOME</th>
+            <th>CATEGORIA</th>
+            <th>SKU</th>
+            <th>PREÇO</th>
+            <th>AÇÕES</th>
+        </tr>
+    </thead>
+
+    <tbody>
+        {% for product in products %}
+        <tr>
+            <td>{{ product.id }}</td>
+            <td>{{ product.name }}</td>
+            <td>{{ product.category }}</td>
+            <td>{{ product.sku }}</td>
+            <td>R$ {{ '%.2f'|format(product.price) }}</td>
+            <td>
+                <form method="POST" action="/products/{{ product.id }}/reactivate">
+                    <button class="btn btn-small" type="submit">Reativar</button>
+                </form>
+            </td>
+        </tr>
+        {% else %}
+        <tr>
+            <td colspan="6" class="empty">Nenhum produto inativo.</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+{% endblock %}

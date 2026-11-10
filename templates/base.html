@@ -5,48 +5,86 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}ERP{% endblock %}</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css')}}">
+    <script src="https://unpkg.com/lucide@latest"></script>
 </head>
 
 <body>
     {% if g.user %}
     <aside class="sidebar">
         <div class="sidebar-brand">
-            <img src="{{ url_for('static', filename='img/logo.png') }}" alt="Logo" class="brand-logo">
+            <button type="button" id="sidebar-toggle" title="Recolher menu">
+                <i data-lucide="panel-left-close"></i>
+            </button>
+        
+            <img src="{{ url_for('static', filename='img/logo.png') }}"
+                 alt="Logo" class="brand-logo">
         </div>
 
         <div class="sidebar-section">
             <span class="sidebar-label">GERAL</span>
-            <a href="/" class="{{ 'active' if request.path == '/' }}">Início</a>
+            <a href="/" title="Início" class="{{ 'active' if request.path == '/' }}">
+                <i data-lucide="house"></i>
+                <span>Início</span>
+            </a>
         </div>
-
+        
         <div class="sidebar-section">
             <span class="sidebar-label">GESTÃO</span>
-            <a href="/clients" class="{{ 'active' if request.path.startswith('/clients') }}">Clientes</a>
-            <a href="/products" class="{{ 'active' if request.path.startswith('/products') }}">Produtos</a>
-            <a href="/employees" class="{{ 'active' if request.path.startswith('/employees') }}">Funcionários</a>
+            <a href="/clients" title="Clientes" class="{{ 'active' if request.path.startswith('/clients') }}">
+                <i data-lucide="users"></i>
+                <span>Clientes</span>
+            </a>
+            <a href="/products" title="Produtos" class="{{ 'active' if request.path.startswith('/products') }}">
+                <i data-lucide="package"></i>
+                <span>Produtos</span>
+            </a>
+            <a href="/employees" title="Funcionários" class="{{ 'active' if request.path.startswith('/employees') }}">
+                <i data-lucide="user-round"></i>
+                <span>Funcionários</span>
+            </a>
         </div>
-
+        
         <div class="sidebar-section">
             <span class="sidebar-label">OPERAÇÕES</span>
-            <a href="/sales" class="{{ 'active' if request.path.startswith('/sales') }}">Vendas</a>
-            <a href="/purchases" class="{{ 'active' if request.path.startswith('/purchases') }}">Compras</a>
-            <a href="/stock" class="{{ 'active' if request.path.startswith('/stock') }}">Estoque</a>
+            <a href="/sales" title="Vendas" class="{{ 'active' if request.path.startswith('/sales') }}">
+                <i data-lucide="shopping-cart"></i>
+                <span>Vendas</span>
+            </a>
+            <a href="/purchases" title="Compras" class="{{ 'active' if request.path.startswith('/purchases') }}">
+                <i data-lucide="truck"></i>
+                <span>Compras</span>
+            </a>
+            <a href="/stock" title="Estoque" class="{{ 'active' if request.path.startswith('/stock') }}">
+                <i data-lucide="boxes"></i>
+                <span>Estoque</span>
+            </a>
         </div>
-
+        
         <div class="sidebar-section">
             <span class="sidebar-label">ADMINISTRAÇÃO</span>
-            <a href="/finance" class="{{ 'active' if request.path.startswith('/finance') }}">Financeiro</a>
-            <a href="/support" class="{{ 'active' if request.path.startswith('/support') }}">Suporte</a>
+            <a href="/finance" title="Financeiro" class="{{ 'active' if request.path.startswith('/finance') }}">
+                <i data-lucide="wallet"></i>
+                <span>Financeiro</span>
+            </a>
         </div>
 
         <div class="sidebar-bottom">
-            <button type="button" id="theme-toggle" class="theme-toggle">
-                🌙 Tema escuro
-            </button>
+            <div class="theme-selector">
+                <button type="button" id="light-theme" title="Modo claro">
+                    <i data-lucide="sun"></i>
+                </button>
+            
+                <button type="button" id="dark-theme" title="Modo escuro">
+                    <i data-lucide="moon"></i>
+                </button>
+            </div>
 
             <div class="sidebar-user">
                 <span>{{ g.user.username }}</span>
-                <a href="/logout">Sair</a>
+                <a href="/logout" title="Sair">
+                    <i data-lucide="log-out"></i>
+                    <span>Sair</span>
+                </a>
             </div>
         </div>
     </aside>
@@ -66,31 +104,61 @@
         {% block content %}{% endblock %}
     </main>
 
-    <script>
-        const themeToggle = document.getElementById("theme-toggle");
+	<script>
+	    const lightButton = document.getElementById("light-theme");
+	    const darkButton = document.getElementById("dark-theme");
 
-        function applyTheme(theme) {
-            document.body.classList.toggle("dark-mode", theme === "dark");
+	    function applyTheme(theme) {
+	        document.body.classList.toggle("dark-mode", theme === "dark");
 
-            if (themeToggle) {
-                themeToggle.textContent =
-                    theme === "dark" ? "☀️ Tema claro" : "🌙 Tema escuro";
-            }
-        }
+	        lightButton?.classList.toggle("selected", theme === "light");
+	        darkButton?.classList.toggle("selected", theme === "dark");
+	    }
 
-        const savedTheme = localStorage.getItem("theme") || "light";
-        applyTheme(savedTheme);
+	    const savedTheme = localStorage.getItem("theme") || "light";
+	    applyTheme(savedTheme);
 
-        if (themeToggle) {
-            themeToggle.addEventListener("click", function() {
-                const newTheme = document.body.classList.contains("dark-mode")
-                    ? "light"
-                    : "dark";
+	    lightButton?.addEventListener("click", function() {
+	        localStorage.setItem("theme", "light");
+	        applyTheme("light");
+	    });
 
-                localStorage.setItem("theme", newTheme);
-                applyTheme(newTheme);
-            });
-        }
-    </script>
+	    darkButton?.addEventListener("click", function() {
+	        localStorage.setItem("theme", "dark");
+	        applyTheme("dark");
+	    });
+	    const sidebar = document.querySelector(".sidebar");
+	    const sidebarToggle = document.getElementById("sidebar-toggle");
+	    const mainContent = document.querySelector(".main-content");
+	    
+	    function applySidebarState(collapsed) {
+	        sidebar.classList.toggle("collapsed", collapsed);
+	        mainContent.classList.toggle("sidebar-collapsed", collapsed);
+	    
+	        sidebarToggle.innerHTML = collapsed
+	            ? '<i data-lucide="panel-left-open"></i>'
+	            : '<i data-lucide="panel-left-close"></i>';
+	    
+	        sidebarToggle.title = collapsed
+	            ? "Expandir menu"
+	            : "Recolher menu";
+	    
+	        lucide.createIcons();
+	    }
+	    
+	    if (sidebar && sidebarToggle && mainContent) {
+	        const savedState = localStorage.getItem("sidebar-collapsed") === "true";
+	    
+	        applySidebarState(savedState);
+	    
+	        sidebarToggle.addEventListener("click", function() {
+	            const collapsed = !sidebar.classList.contains("collapsed");
+	    
+	            localStorage.setItem("sidebar-collapsed", collapsed);
+	            applySidebarState(collapsed);
+	        });
+	    }
+	    lucide.createIcons();
+	</script>
 </body>
 </html>

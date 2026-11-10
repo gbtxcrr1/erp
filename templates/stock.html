@@ -76,23 +76,27 @@ Estoque
             <td>{{ movement.id }}</td>
             <td>{{ movement.product.name }}</td>
 			<td>
-			    {% if movement.movement_type == "purchase" %}
-			        <span class="badge badge-ok">Compra</span>
-			    {% elif movement.movement_type == "sale" %}
-			        <span class="badge badge-danger">Venda</span>
-			    {% elif movement.movement_type == "adjustment" %}
+			    {% if movement.movement_type == 'purchase' %}
+			        <span class="badge badge-purchase">Compra</span>
+			    {% elif movement.movement_type == 'sale' %}
+			        <span class="badge badge-sale">Venda</span>
+			    {% elif movement.movement_type == 'adjustment' %}
 			        <span class="badge badge-warning">Ajuste</span>
-			    {% elif movement.movement_type == "return" %}
+			    {% elif movement.movement_type == 'return' %}
 			        <span class="badge badge-info">Devolução</span>
 			    {% else %}
-			        <span class="badge">{{ movement.movement_type }}</span>
+			        <span class="badge">-</span>
 			    {% endif %}
 			</td>
             <td>
-                {% if movement.direction == "in" %}
-                    <span class="badge badge-ok">Entrada</span>
+                {% if movement.movement_type == 'adjustment' %}
+                    {% if movement.direction == 'in' %}
+                        <span class="badge badge-ok">Entrada</span>
+                    {% else %}
+                        <span class="badge badge-danger">Saída</span>
+                    {% endif %}
                 {% else %}
-                    <span class="badge badge-danger">Saída</span>
+                    -
                 {% endif %}
             </td>
             <td>{{ movement.quantity }}</td>

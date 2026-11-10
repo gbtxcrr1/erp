@@ -59,6 +59,7 @@ class Product(db.Model):
     category = db.Column(db.String(100))
     sku = db.Column(db.String(50), unique=True)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    active = db.Column(db.Boolean, default=True, nullable=False)
 
     def __repr__(self):
         return f"<Produto {self.name}>"
@@ -161,24 +162,6 @@ class FinancialTransaction(db.Model):
 
     def __repr__(self):
         return f"<{self.type} {self.description}>"
-
-
-# ===================== SUPPORT =====================
-class SupportTicket(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    client_id = db.Column(db.Integer, db.ForeignKey('client.id'), nullable=False)
-    subject = db.Column(db.String(200), nullable=False)
-    description = db.Column(db.Text)
-    status = db.Column(db.String(20), nullable=False, default='aberto')  # aberto, em andamento, fechado
-    priority = db.Column(db.String(20), nullable=False, default='média')  # baixa, média, alta
-    created_at = db.Column(db.DateTime, default=datetime.utcnow)
-    updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
-
-    client = db.relationship('Client', backref='tickets')
-
-    def __repr__(self):
-        return f"<Chamado #{self.id} - {self.subject}>"
-
 
 # ===================== EMPLOYEES =====================
 class Employee(db.Model):
