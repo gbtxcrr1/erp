@@ -1,0 +1,7 @@
+TODO:
+
+* aumentar a logo
+* arrumar o bagulho do preço negativo
+* deixar mais bonito os bagulho do lado ali, tirar emoji etc
+* tirar suporte
+* arrumar o bagulho de produto e excluir produto
