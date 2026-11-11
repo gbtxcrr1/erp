@@ -1,8 +1,14 @@
+FAZIDO:
+
+* aumentar a logo 
+* arrumar o bagulho do preço negativo 
+* deixar mais bonito os bagulho do lado ali, tirar emoji etc 
+* tirar suporte 
+* arrumar o bagulho de produto e excluir produto 
+* mudar horario na aba "Compras" 
+
+
 TODO:
 
-* aumentar a logo // FEITO
-* arrumar o bagulho do preço negativo // FEITO
-* deixar mais bonito os bagulho do lado ali, tirar emoji etc // FEITO
-* tirar suporte // FEITO
-* arrumar o bagulho de produto e excluir produto // FEITO
-* mudar horario na aba "Compras" // FEITO
+* tirar detalhes ali do bglh sla
+* gerar sku automaticamente
