@@ -533,7 +533,11 @@ body.dark-mode .theme-toggle:hover {
 .main-content {
     margin-left: 240px;
     padding: 30px;
+}
+
+.page {
     max-width: 1200px;
+    margin: 0 auto;
 }
 
 /* Sidebar theme button */
@@ -688,4 +692,37 @@ body.dark-mode .sidebar-section a.active {
     height: 38px;
     flex: none;
     padding: 8px;
+}
+
+.theme-toggle {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    padding: 0;
+    border: 1px solid currentColor;
+    border-radius: 8px;
+    background: transparent;
+    color: inherit;
+    cursor: pointer;
+    opacity: 0.8;
+}
+
+.theme-toggle:hover { opacity: 1; }
+
+/* lua no tema claro, sol no escuro */
+.theme-toggle .icon-sun { display: none; }
+body.dark-mode .theme-toggle .icon-sun { display: inline-block; }
+body.dark-mode .theme-toggle .icon-moon { display: none; }
+
+.theme-toggle-floating {
+    position: fixed;
+    top: 16px;
+    right: 16px;
+}
+
+.no-transition,
+.no-transition * {
+    transition: none !important;
 }

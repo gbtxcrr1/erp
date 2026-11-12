@@ -44,8 +44,8 @@
 	    {% endfor %}
 	</select>
 	
-    <label>SKU</label>
-    <input name="sku" placeholder="código" value="{{ product.sku if product else '' }}">
+<label>SKU</label>
+<input value="{{ product.sku if product else 'Gerado automaticamente ao salvar' }}" disabled>
 
     <div class="form-actions">
         <button class="btn" type="submit">Salvar</button>

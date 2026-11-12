@@ -8,7 +8,7 @@
     <script src="https://unpkg.com/lucide@latest"></script>
 </head>
 
-<body>
+<body class="no-transition">
     {% if g.user %}
     <aside class="sidebar">
         <div class="sidebar-brand">
@@ -68,19 +68,14 @@
             </a>
         </div>
 
-        <div class="sidebar-bottom">
-            <div class="theme-selector">
-                <button type="button" id="light-theme" title="Modo claro">
-                    <i data-lucide="sun"></i>
-                </button>
-            
-                <button type="button" id="dark-theme" title="Modo escuro">
-                    <i data-lucide="moon"></i>
-                </button>
-            </div>
+<div class="sidebar-bottom">
+    <button type="button" class="theme-toggle" title="Alternar tema" aria-label="Alternar tema">
+        <i data-lucide="moon" class="icon-moon"></i>
+        <i data-lucide="sun" class="icon-sun"></i>
+    </button>
 
             <div class="sidebar-user">
-                <span>{{ g.user.username }}</span>
+                <span>Olá, {{ g.user.username }}</span>
                 <a href="/logout" title="Sair">
                     <i data-lucide="log-out"></i>
                     <span>Sair</span>
@@ -88,9 +83,15 @@
             </div>
         </div>
     </aside>
+    {% else %}
+    <button type="button" class="theme-toggle theme-toggle-floating" title="Alternar tema" aria-label="Alternar tema">
+        <i data-lucide="moon" class="icon-moon"></i>
+        <i data-lucide="sun" class="icon-sun"></i>
+    </button>
     {% endif %}
 
-    <main class="{{ 'main-content' if g.user else 'container' }}">
+<main class="{{ 'main-content' if g.user else 'container' }}">
+    <div class="page">
         {% with messages = get_flashed_messages() %}
             {% if messages %}
                 <div class="flash">
@@ -102,63 +103,62 @@
         {% endwith %}
 
         {% block content %}{% endblock %}
-    </main>
+    </div>
+</main>
 
-	<script>
-	    const lightButton = document.getElementById("light-theme");
-	    const darkButton = document.getElementById("dark-theme");
+<script>
 
-	    function applyTheme(theme) {
-	        document.body.classList.toggle("dark-mode", theme === "dark");
+    requestAnimationFrame(function() {
+    requestAnimationFrame(function() {
+        document.body.classList.remove("no-transition");
+    });
+});
 
-	        lightButton?.classList.toggle("selected", theme === "light");
-	        darkButton?.classList.toggle("selected", theme === "dark");
-	    }
+    const themeButtons = document.querySelectorAll(".theme-toggle");
 
-	    const savedTheme = localStorage.getItem("theme") || "light";
-	    applyTheme(savedTheme);
+    function applyTheme(theme) {
+        document.body.classList.toggle("dark-mode", theme === "dark");
+    }
 
-	    lightButton?.addEventListener("click", function() {
-	        localStorage.setItem("theme", "light");
-	        applyTheme("light");
-	    });
+    applyTheme(localStorage.getItem("theme") || "light");
 
-	    darkButton?.addEventListener("click", function() {
-	        localStorage.setItem("theme", "dark");
-	        applyTheme("dark");
-	    });
-	    const sidebar = document.querySelector(".sidebar");
-	    const sidebarToggle = document.getElementById("sidebar-toggle");
-	    const mainContent = document.querySelector(".main-content");
-	    
-	    function applySidebarState(collapsed) {
-	        sidebar.classList.toggle("collapsed", collapsed);
-	        mainContent.classList.toggle("sidebar-collapsed", collapsed);
-	    
-	        sidebarToggle.innerHTML = collapsed
-	            ? '<i data-lucide="panel-left-open"></i>'
-	            : '<i data-lucide="panel-left-close"></i>';
-	    
-	        sidebarToggle.title = collapsed
-	            ? "Expandir menu"
-	            : "Recolher menu";
-	    
-	        lucide.createIcons();
-	    }
-	    
-	    if (sidebar && sidebarToggle && mainContent) {
-	        const savedState = localStorage.getItem("sidebar-collapsed") === "true";
-	    
-	        applySidebarState(savedState);
-	    
-	        sidebarToggle.addEventListener("click", function() {
-	            const collapsed = !sidebar.classList.contains("collapsed");
-	    
-	            localStorage.setItem("sidebar-collapsed", collapsed);
-	            applySidebarState(collapsed);
-	        });
-	    }
-	    lucide.createIcons();
-	</script>
+    themeButtons.forEach(function(button) {
+        button.addEventListener("click", function() {
+            const next = document.body.classList.contains("dark-mode") ? "light" : "dark";
+            localStorage.setItem("theme", next);
+            applyTheme(next);
+        });
+    });
+
+    const sidebar = document.querySelector(".sidebar");
+    const sidebarToggle = document.getElementById("sidebar-toggle");
+    const mainContent = document.querySelector(".main-content");
+
+    function applySidebarState(collapsed) {
+        sidebar.classList.toggle("collapsed", collapsed);
+        mainContent.classList.toggle("sidebar-collapsed", collapsed);
+
+        sidebarToggle.innerHTML = collapsed
+            ? '<i data-lucide="panel-left-open"></i>'
+            : '<i data-lucide="panel-left-close"></i>';
+
+        sidebarToggle.title = collapsed ? "Expandir menu" : "Recolher menu";
+
+        lucide.createIcons();
+    }
+
+    if (sidebar && sidebarToggle && mainContent) {
+        const savedState = localStorage.getItem("sidebar-collapsed") === "true";
+        applySidebarState(savedState);
+
+        sidebarToggle.addEventListener("click", function() {
+            const collapsed = !sidebar.classList.contains("collapsed");
+            localStorage.setItem("sidebar-collapsed", collapsed);
+            applySidebarState(collapsed);
+        });
+    }
+
+    lucide.createIcons();
+</script>
 </body>
 </html>

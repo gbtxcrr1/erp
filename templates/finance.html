@@ -11,11 +11,11 @@ Financeiro
 <div class="summary">
     <div class="summary-card">
         <span class="summary-label">Receitas</span>
-        <span class="summary-value revenue">R$ {{ '%.2f'|format(total_revenue) }}</span>
+        <span class="summary-value revenue">{{ total_revenue|brl }}</span>
     </div>
     <div class="summary-card">
         <span class="summary-label">Despesas</span>
-        <span class="summary-value expense">R$ {{ '%.2f'|format(total_expense) }}</span>
+        <span class="summary-value expense">{{ sale.total_price|brl }}</span>
     </div>
     <div class="summary-card">
         <span class="summary-label">Saldo</span>

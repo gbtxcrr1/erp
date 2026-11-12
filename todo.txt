@@ -6,9 +6,12 @@ FAZIDO:
 * tirar suporte 
 * arrumar o bagulho de produto e excluir produto 
 * mudar horario na aba "Compras" 
-
+* gerar sku automaticamente
 
 TODO:
 
 * tirar detalhes ali do bglh sla
-* gerar sku automaticamente
+* limitar cpf pra 11 digito e formatado
+* criar login de funcionario
+* mudar senha do admin kkkkkkkkkk
+* arrumar cadastro funcionario

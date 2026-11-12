@@ -1,3 +1,4 @@
+import re
 from functools import wraps
 from flask import Flask, render_template
 from flask import request, redirect, url_for, flash, session, g
@@ -18,6 +19,16 @@ from models import (
 
 app = Flask(__name__)
 app.config.from_object(Config)
+
+@app.template_filter("brl")
+def brl(value):
+    try:
+        value = round(float(value or 0), 2)
+    except (TypeError, ValueError):
+        value = 0.0
+    formatted = f"{abs(value):,.2f}".replace(",", "X").replace(".", ",").replace("X", ".")
+    sign = "-" if value < 0 else ""
+    return f"{sign}R$ {formatted}"
 
 db.init_app(app)
 migrate = Migrate(app, db)
@@ -219,6 +230,36 @@ def delete_client(client_id):
     return redirect(url_for("clients"))
 
 
+SKU_PREFIXES = {
+    "Smartphones": "CELS",
+    "Computadores": "COMP",
+    "Tablets": "TABS",
+    "Periféricos": "PERF",
+    "Componentes": "PECA",
+    "Monitores": "TELA",
+    "Áudio": "SONS",
+    "Acessórios": "FONE",
+    "Redes": "CPLP",
+    "Armazenamento": "ARMS",
+    "Outros": "OUTR",
+}
+
+
+def generate_sku(category):
+    prefix = SKU_PREFIXES.get(category, "OUTR")
+    pattern = re.compile(rf"^{prefix}(\d{{4}})([A-Z])$")
+
+    last = 0
+    for (sku,) in db.session.query(Product.sku).filter(Product.sku.like(f"{prefix}_____")):
+        match = pattern.match(sku or "")
+        if match:
+            seq = (ord(match.group(2)) - 65) * 9999 + int(match.group(1))
+            last = max(last, seq)
+
+    block, digits = divmod(last, 9999)
+    return f"{prefix}{digits + 1:04d}{chr(65 + block)}"
+
+
 # ===================== PRODUCTS =====================
 @app.route("/products")
 @login_required
@@ -274,7 +315,7 @@ def new_product():
             description=request.form["description"],
             price=price,
             category=request.form["category"],
-            sku=request.form["sku"],
+            sku=generate_sku(request.form["category"]),
         )
 
         db.session.add(product)
@@ -306,7 +347,6 @@ def edit_product(product_id):
         product.description = request.form["description"]
         product.price = price
         product.category = request.form["category"]
-        product.sku = request.form["sku"]
 
         db.session.commit()
         flash("Produto atualizado!")

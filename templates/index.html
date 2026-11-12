@@ -10,26 +10,26 @@ Início
 
 <div class="summary">
 
-    <div class="summary-card">
-        <span class="summary-label">Receitas</span>
-        <span class="summary-value revenue">
-            R$ {{ '%.2f'|format(total_revenue) }}
-        </span>
-    </div>
+<div class="summary-card">
+    <span class="summary-label">Receitas</span>
+    <span class="summary-value revenue">
+        {{ total_revenue|brl }}
+    </span>
+</div>
 
-    <div class="summary-card">
-        <span class="summary-label">Despesas</span>
-        <span class="summary-value expense">
-            R$ {{ '%.2f'|format(total_expense) }}
-        </span>
-    </div>
+<div class="summary-card">
+    <span class="summary-label">Despesas</span>
+    <span class="summary-value expense">
+        {{ total_expense|brl }}
+    </span>
+</div>
 
-    <div class="summary-card">
-        <span class="summary-label">Saldo</span>
-        <span class="summary-value {{ 'revenue' if balance >= 0 else 'expense' }}">
-            R$ {{ '%.2f'|format(balance) }}
-        </span>
-    </div>
+<div class="summary-card">
+    <span class="summary-label">Saldo</span>
+    <span class="summary-value {{ 'revenue' if balance >= 0 else 'expense' }}">
+        {{ balance|brl }}
+    </span>
+</div>
 
     <div class="summary-card">
         <span class="summary-label">Produtos cadastrados</span>
