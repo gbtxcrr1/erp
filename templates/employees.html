@@ -39,6 +39,7 @@ Funcionários
             <td class="actions">
                 <a class="btn btn-small" href="/employees/{{ employee.id }}/edit">Editar</a>
                 <form method="POST" action="/employees/{{ employee.id }}/delete" class="inline-form">
+					<input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                     <button class="btn btn-small btn-danger" type="submit" onclick="return confirm('Excluir funcionário?')">Excluir</button>
                 </form>
             </td>

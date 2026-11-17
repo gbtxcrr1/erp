@@ -8,6 +8,7 @@
 <h2>{{ 'Editar Funcionário' if employee else 'Novo Funcionário' }}</h2>
 
 <form method="POST" class="form">
+	<input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
     <label>Nome</label>
     <input name="name" placeholder="nome" value="{{ employee.name if employee else '' }}" required>
 

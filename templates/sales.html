@@ -36,6 +36,7 @@ Vendas
             <td>R$ {{ '%.2f'|format(sale.total_price) }}</td>
             <td class="actions">
                 <form method="POST" action="/sales/{{ sale.id }}/delete" class="inline-form">
+					<input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                     <button class="btn btn-small btn-danger" type="submit" onclick="return confirm('Excluir esta venda?')">Excluir</button>
                 </form>
             </td>

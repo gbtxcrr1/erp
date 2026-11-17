@@ -55,6 +55,7 @@ Financeiro
             <td>R$ {{ '%.2f'|format(transaction.amount) }}</td>
             <td class="actions">
                 <form method="POST" action="/finance/{{ transaction.id }}/delete" class="inline-form">
+					<input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                     <button class="btn btn-small btn-danger" type="submit" onclick="return confirm('Excluir lançamento?')">Excluir</button>
                 </form>
             </td>

@@ -3,6 +3,7 @@ from functools import wraps
 from flask import Flask, render_template
 from flask import request, redirect, url_for, flash, session, g, abort
 from flask_migrate import Migrate
+from flask_wtf.csrf import CSRFProtect
 from sqlalchemy import func
 from datetime import datetime, timedelta
 from zoneinfo import ZoneInfo
@@ -19,6 +20,7 @@ from models import (
 
 app = Flask(__name__)
 app.config.from_object(Config)
+csrf = CSRFProtect(app)
 
 @app.template_filter("brl")
 def brl(value):
@@ -514,11 +516,18 @@ def new_sale():
     products = Product.query.filter_by(active=True).all()
     if request.method == "POST":
         product = Product.query.get(request.form["product_id"])
-        
         if product is None or not product.active:
             flash("Este produto está inativo ou não existe.")
             return render_template("new_sale.html", clients=clients, products=products)
-        quantity = int(request.form["quantity"])
+            
+        try:
+            quantity = int(request.form["quantity"])
+            if quantity <= 0:
+                flash("A quantidade deve ser maior que zero.")
+                return render_template("new_sale.html", clients=clients, products=products)
+        except (ValueError, TypeError):
+            flash("Quantidade inválida.")
+            return render_template("new_sale.html", clients=clients, products=products)
 
         # verifica estoque
         stock = StockItem.query.filter_by(product_id=product.id).first()
@@ -574,7 +583,7 @@ def new_sale():
 
 
 @app.route("/sales/<int:sale_id>/delete", methods=["POST"])
-@login_required
+@role_required("manager", "admin")
 def delete_sale(sale_id):
     sale = Sale.query.get_or_404(sale_id)
     db.session.delete(sale)

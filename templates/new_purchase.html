@@ -10,7 +10,7 @@ Nova Compra
 <h2>Nova Compra</h2>
 
 <form method="POST" class="form">
-
+	<input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
     <label>Produto</label>
     <select name="product_id" required>
         <option value="" disabled selected>Selecione um produto</option>

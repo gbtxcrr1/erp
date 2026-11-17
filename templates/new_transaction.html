@@ -8,6 +8,7 @@ Novo Lançamento
 <h2>Novo Lançamento Financeiro</h2>
 
 <form method="POST" class="form">
+	<input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
     <label>Tipo</label>
     <select name="type" required>
         <option value="receita">Receita</option>

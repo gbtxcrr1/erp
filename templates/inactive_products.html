@@ -35,6 +35,7 @@ Produtos Inativos
             <td>R$ {{ '%.2f'|format(product.price) }}</td>
             <td>
                 <form method="POST" action="/products/{{ product.id }}/reactivate">
+					<input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                     <button class="btn btn-small" type="submit">Reativar</button>
                 </form>
             </td>

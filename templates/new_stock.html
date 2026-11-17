@@ -8,6 +8,7 @@
 <h2>{{ 'Editar Estoque' if item else 'Adicionar ao Estoque' }}</h2>
 
 <form method="POST" class="form">
+	<input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
     <label>Produto</label>
     <select name="product_id" {% if item %}disabled{% endif %}>
         {% for product in products %}

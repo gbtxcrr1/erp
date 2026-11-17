@@ -8,6 +8,7 @@ Nova Venda
 <h2>Nova Venda</h2>
 
 <form method="POST" class="form">
+	<input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
     <label>Cliente</label>
     <select name="client_id" required>
         <option value="">Selecione...</option>

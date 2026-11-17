@@ -43,6 +43,7 @@ Estoque
             <td class="actions">
                 <a class="btn btn-small" href="/stock/{{ item.id }}/edit">Editar</a>
                 <form method="POST" action="/stock/{{ item.id }}/delete" class="inline-form">
+					<input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                     <button class="btn btn-small btn-danger" type="submit" onclick="return confirm('Excluir registro de estoque?')">Excluir</button>
                 </form>
             </td>

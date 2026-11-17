@@ -41,6 +41,7 @@ Clientes
             <td class="actions">
                 <a class="btn btn-small" href="/clients/{{ client.id }}/edit">Editar</a>
                 <form method="POST" action="/clients/{{ client.id }}/delete" class="inline-form">
+					<input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                     <button class="btn btn-small btn-danger" type="submit" onclick="return confirm('Excluir este cliente?')">Excluir</button>
                 </form>
             </td>

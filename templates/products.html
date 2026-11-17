@@ -39,6 +39,7 @@ Produtos
             <td class="actions">
                 <a class="btn btn-small" href="/products/{{ product.id }}/edit">Editar</a>
                 <form method="POST" action="/products/{{ product.id }}/delete" class="inline-form">
+					<input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                     {% if product.id in products_with_history %}
                         <button class="btn btn-small btn-danger" type="submit"
                             onclick="return confirm('Deseja realmente desativar este produto?')">

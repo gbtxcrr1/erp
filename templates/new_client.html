@@ -8,6 +8,7 @@
 <h2>{{ 'Editar Cliente' if client else 'Novo Cliente' }}</h2>
 
 <form method="POST" class="form">
+	<input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
     <label>Nome</label>
     <input name="name" placeholder="nome" value="{{ client.name if client else '' }}" required>
 
