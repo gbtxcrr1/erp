@@ -1,7 +1,7 @@
 import re
 from functools import wraps
 from flask import Flask, render_template
-from flask import request, redirect, url_for, flash, session, g
+from flask import request, redirect, url_for, flash, session, g, abort
 from flask_migrate import Migrate
 from sqlalchemy import func
 from datetime import datetime, timedelta
@@ -42,6 +42,21 @@ def login_required(view):
             return redirect(url_for("login"))
         return view(*args, **kwargs)
     return wrapped_view
+
+def role_required(*roles):
+    def decorator(view):
+        @wraps(view)
+        @login_required
+        def wrapped_view(*args, **kwargs):
+            if g.user.role not in roles:
+                abort(403)
+            return view(*args, **kwargs)
+        return wrapped_view
+    return decorator
+
+@app.errorhandler(403)
+def forbidden(error):
+    return render_template("403.html"), 403
 
 
 @app.before_request
@@ -289,7 +304,7 @@ def inactive_products():
 
 
 @app.route("/products/<int:product_id>/reactivate", methods=["POST"])
-@login_required
+@role_required("manager","admin")
 def reactivate_product(product_id):
     product = Product.query.get_or_404(product_id)
 
@@ -301,7 +316,7 @@ def reactivate_product(product_id):
 
 
 @app.route("/products/new", methods=["GET", "POST"])
-@login_required
+@role_required("manager","admin")
 def new_product():
     if request.method == "POST":
         price = float(request.form["price"] or 0)
@@ -332,7 +347,7 @@ def new_product():
 
 
 @app.route("/products/<int:product_id>/edit", methods=["GET", "POST"])
-@login_required
+@role_required("manager","admin")
 def edit_product(product_id):
     product = Product.query.get_or_404(product_id)
 
@@ -356,7 +371,7 @@ def edit_product(product_id):
 
 
 @app.route("/products/<int:product_id>/delete", methods=["POST"])
-@login_required
+@role_required("manager","admin")
 def delete_product(product_id):
     product = Product.query.get_or_404(product_id)
 
@@ -394,7 +409,7 @@ def stock():
 
 
 @app.route("/stock/new", methods=["GET", "POST"])
-@login_required
+@role_required("manager", "admin")
 def new_stock():
     products = Product.query.all()
     if request.method == "POST":
@@ -420,7 +435,7 @@ def new_stock():
 
 
 @app.route("/stock/<int:item_id>/edit", methods=["GET", "POST"])
-@login_required
+@role_required("manager", "admin")
 def edit_stock(item_id):
     item = StockItem.query.get_or_404(item_id)
 
@@ -473,7 +488,7 @@ def edit_stock(item_id):
 
 
 @app.route("/stock/<int:item_id>/delete", methods=["POST"])
-@login_required
+@role_required("manager", "admin")
 def delete_stock(item_id):
     item = StockItem.query.get_or_404(item_id)
     db.session.delete(item)
@@ -593,7 +608,7 @@ def purchase_list():
     )
 
 @app.route("/purchases/new", methods=["GET", "POST"])
-@login_required
+@role_required("manager", "admin")
 def new_purchase():
     products = Product.query.filter_by(active=True).all()
 
@@ -714,14 +729,14 @@ def delete_transaction(transaction_id):
 
 # ===================== EMPLOYEES =====================
 @app.route("/employees")
-@login_required
+@role_required("admin")
 def employees():
     employees = Employee.query.all()
     return render_template("employees.html", employees=employees)
 
 
 @app.route("/employees/new", methods=["GET", "POST"])
-@login_required
+@role_required("admin")
 def new_employee():
     if request.method == "POST":
         hire_date = None
@@ -744,7 +759,7 @@ def new_employee():
 
 
 @app.route("/employees/<int:employee_id>/edit", methods=["GET", "POST"])
-@login_required
+@role_required("admin")
 def edit_employee(employee_id):
     employee = Employee.query.get_or_404(employee_id)
     if request.method == "POST":
@@ -765,7 +780,7 @@ def edit_employee(employee_id):
 
 
 @app.route("/employees/<int:employee_id>/delete", methods=["POST"])
-@login_required
+@role_required("admin")
 def delete_employee(employee_id):
     employee = Employee.query.get_or_404(employee_id)
     db.session.delete(employee)
