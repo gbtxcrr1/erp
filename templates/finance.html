@@ -19,7 +19,7 @@ Financeiro
     </div>
     <div class="summary-card">
         <span class="summary-label">Saldo</span>
-        <span class="summary-value {{ 'revenue' if balance >= 0 else 'expense' }}">R$ {{ '%.2f'|format(balance) }}</span>
+        <span class="summary-value {{ 'revenue' if balance >= 0 else 'expense' }}">{{ balance|brl }}</span>
     </div>
 </div>
 
@@ -52,7 +52,7 @@ Financeiro
             </td>
             <td>{{ transaction.description }}</td>
             <td>{{ transaction.category }}</td>
-            <td>R$ {{ '%.2f'|format(transaction.amount) }}</td>
+            <td>{{ transaction.amount|brl }}</td>
             <td class="actions">
                 <form method="POST" action="/finance/{{ transaction.id }}/delete" class="inline-form">
 					<input type="hidden" name="csrf_token" value="{{ csrf_token() }}">

@@ -17,7 +17,7 @@ Compras
     <div class="summary-card">
         <span class="summary-label">Valor Total</span>
         <span class="summary-value">
-            R$ {{ '%.2f'|format(total_purchases) }}
+			{{ total_purchases|brl }}
         </span>
     </div>
 </div>
@@ -47,8 +47,8 @@ Compras
             <td>{{ purchase.supplier.name if purchase.supplier else '-' }}</td>
             <td>{{ purchase.product.name }}</td>
             <td>{{ purchase.quantity }}</td>
-            <td>R$ {{ '%.2f'|format(purchase.unit_price) }}</td>
-            <td>R$ {{ '%.2f'|format(purchase.total_price) }}</td>
+            <td>{{ purchase.unit_price|brl }}</td>
+            <td>{{ purchase.total_price|brl }}</td>
             <td>{{ purchase.date.strftime('%d/%m/%Y %H:%M') if purchase.date else '-' }}</td>
             <td class="actions">
                 <a class="btn btn-small" href="/purchases/{{ purchase.id }}">

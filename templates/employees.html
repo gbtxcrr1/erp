@@ -34,7 +34,7 @@ Funcionários
             <td>{{ employee.position }}</td>
             <td>{{ employee.phone }}</td>
             <td>{{ employee.email }}</td>
-            <td>R$ {{ '%.2f'|format(employee.salary) }}</td>
+            <td>{{ employee.salary|brl }}</td>
             <td>{{ employee.hire_date.strftime('%d/%m/%Y') if employee.hire_date else '-' }}</td>
             <td class="actions">
                 <a class="btn btn-small" href="/employees/{{ employee.id }}/edit">Editar</a>

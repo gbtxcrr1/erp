@@ -8,35 +8,85 @@
 <h2>{{ 'Editar Cliente' if client else 'Novo Cliente' }}</h2>
 
 <form method="POST" class="form">
-	<input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
     <label>Nome</label>
-    <input name="name" placeholder="nome" value="{{ client.name if client else '' }}" required>
+    <input name="name" placeholder="Nome"
+           value="{{ form_data.get('name', client.name if client else '') if form_data is defined else (client.name if client else '') }}" required>
 
     <label>CPF</label>
-    <input name="cpf" placeholder="cpf" value="{{ client.cpf if client else '' }}" required>
+    <input name="cpf" id="cpf" type="text"
+           placeholder="000.000.000-00"
+           value="{{ form_data.get('cpf', client.cpf if client else '') if form_data is defined else (client.cpf if client else '') }}"
+           maxlength="14" inputmode="numeric" required>
 
-    <label>Telefone</label>
-    <input name="phone" placeholder="telefone" value="{{ client.phone if client else '' }}">
+    <label>Celular</label>
+    <input name="phone" id="phone" type="text"
+           placeholder="(00) 00000-0000"
+           value="{{ form_data.get('phone', client.phone if client else '') if form_data is defined else (client.phone if client else '') }}"
+           maxlength="15" inputmode="numeric">
 
-    <label>Email</label>
-    <input name="email" placeholder="email" value="{{ client.email if client else '' }}" required>
+    <label>E-mail</label>
+    <input
+        name="email"
+        type="email"
+        placeholder="usuario@email.com"
+        value="{{ form_data.get('email', client.email if client else '') if form_data is defined else (client.email if client else '') }}"
+        pattern=".+@.+\.[a-zA-Z]{2,}"
+        title="O e-mail precisa ter uma extensão, como .com ou .com.br"
+        oninvalid="this.setCustomValidity('Informe um e-mail com extensão, como usuario@email.com')"
+        oninput="this.setCustomValidity('')"
+        required
+    >
 
     <label>Endereço</label>
-    <input name="address" placeholder="endereço" value="{{ client.address if client else '' }}">
+    <input name="address" placeholder="Endereço"
+           value="{{ form_data.get('address', client.address if client else '') if form_data is defined else (client.address if client else '') }}">
 
     <label>Cidade</label>
-    <input name="city" placeholder="cidade" value="{{ client.city if client else '' }}">
+    <input name="city" placeholder="Cidade"
+           value="{{ form_data.get('city', client.city if client else '') if form_data is defined else (client.city if client else '') }}">
 
     <label>UF</label>
-    <input name="state" placeholder="estado" value="{{ client.state if client else '' }}">
+    <select name="state" required>
+        <option value="">Selecione o estado</option>
+        {% set states = [
+            ('AC', 'Acre'), ('AL', 'Alagoas'), ('AP', 'Amapá'),
+            ('AM', 'Amazonas'), ('BA', 'Bahia'), ('CE', 'Ceará'),
+            ('DF', 'Distrito Federal'), ('ES', 'Espírito Santo'),
+            ('GO', 'Goiás'), ('MA', 'Maranhão'), ('MT', 'Mato Grosso'),
+            ('MS', 'Mato Grosso do Sul'), ('MG', 'Minas Gerais'),
+            ('PA', 'Pará'), ('PB', 'Paraíba'), ('PR', 'Paraná'),
+            ('PE', 'Pernambuco'), ('PI', 'Piauí'), ('RJ', 'Rio de Janeiro'),
+            ('RN', 'Rio Grande do Norte'), ('RS', 'Rio Grande do Sul'),
+            ('RO', 'Rondônia'), ('RR', 'Roraima'), ('SC', 'Santa Catarina'),
+            ('SP', 'São Paulo'), ('SE', 'Sergipe'), ('TO', 'Tocantins')
+        ] %}
+
+        {% for uf, state_name in states %}
+            <option value="{{ uf }}"
+                {% if form_data is defined and form_data.get('state') == uf %}
+                    selected
+                {% elif (form_data is not defined or not form_data) and client and client.state == uf %}
+                    selected
+                {% endif %}>
+                {{ state_name }}
+            </option>
+        {% endfor %}
+    </select>
 
     <label>CEP</label>
-    <input name="cep" placeholder="cep" value="{{ client.cep if client else '' }}">
+    <input name="cep" id="cep" type="text"
+           placeholder="00000-000"
+           value="{{ form_data.get('cep', client.cep if client else '') if form_data is defined else (client.cep if client else '') }}"
+           maxlength="9" inputmode="numeric">
 
     <div class="form-actions">
         <button class="btn" type="submit">Salvar</button>
         <a class="btn btn-secondary" href="/clients">Cancelar</a>
     </div>
 </form>
+
+<script src="{{ url_for('static', filename='js/form_masks.js') }}"></script>
 
 {% endblock %}

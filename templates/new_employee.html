@@ -8,37 +8,59 @@
 <h2>{{ 'Editar Funcionário' if employee else 'Novo Funcionário' }}</h2>
 
 <form method="POST" class="form">
-	<input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
     <label>Nome</label>
-    <input name="name" placeholder="nome" value="{{ employee.name if employee else '' }}" required>
+    <input name="name" placeholder="Nome"
+           value="{{ employee.name if employee else '' }}" required>
 
     <label>CPF</label>
-    <input name="cpf" placeholder="cpf" value="{{ employee.cpf if employee else '' }}" required>
+    <input name="cpf" id="cpf" type="text"
+           placeholder="000.000.000-00"
+           value="{{ employee.cpf if employee else '' }}"
+           maxlength="14" inputmode="numeric" required>
 
-	<label for="position">Cargo</label>
-	<select name="position" id="position" required>
-	    <option value="">Selecione...</option>
-	    <option value="employee">Funcionário</option>
-	    <option value="manager">Gerente</option>
-	    <option value="admin">Administrador</option>
-	</select>
+    <label for="position">Cargo</label>
+    <select name="position" id="position" required>
+        <option value="">Selecione...</option>
+        <option value="employee" {% if employee and employee.position == 'employee' %}selected{% endif %}>Funcionário</option>
+        <option value="manager" {% if employee and employee.position == 'manager' %}selected{% endif %}>Gerente</option>
+        <option value="admin" {% if employee and employee.position == 'admin' %}selected{% endif %}>Administrador</option>
+    </select>
 
-    <label>Telefone</label>
-    <input name="phone" placeholder="telefone" value="{{ employee.phone if employee else '' }}">
+    <label>Celular</label>
+    <input name="phone" id="phone" type="text"
+           placeholder="(00) 00000-0000"
+           value="{{ employee.phone if employee else '' }}"
+           maxlength="15" inputmode="numeric">
 
-    <label>Email</label>
-    <input name="email" placeholder="email" value="{{ employee.email if employee else '' }}">
+    <label>E-mail</label>
+    <input
+        name="email"
+        type="email"
+        placeholder="usuario@email.com"
+        value="{{ employee.email if employee else '' }}"
+        pattern=".+@.+\.[a-zA-Z]{2,}"
+        title="O e-mail precisa ter uma extensão, como .com ou .com.br"
+        oninvalid="this.setCustomValidity('Informe um e-mail com extensão, como usuario@email.com')"
+        oninput="this.setCustomValidity('')"
+    >
 
     <label>Salário (R$)</label>
-    <input type="number" step="0.01" name="salary" placeholder="0.00" value="{{ employee.salary if employee else '' }}">
+    <input type="number" step="0.01" name="salary"
+           placeholder="0.00"
+           value="{{ employee.salary if employee else '' }}">
 
     <label>Data de contratação</label>
-    <input type="date" name="hire_date" value="{{ employee.hire_date.strftime('%Y-%m-%d') if employee and employee.hire_date else '' }}">
+    <input type="date" name="hire_date"
+           value="{{ employee.hire_date.strftime('%Y-%m-%d') if employee and employee.hire_date else '' }}">
 
     <div class="form-actions">
         <button class="btn" type="submit">Salvar</button>
         <a class="btn btn-secondary" href="/employees">Cancelar</a>
     </div>
 </form>
+
+<script src="{{ url_for('static', filename='js/form_masks.js') }}"></script>
 
 {% endblock %}

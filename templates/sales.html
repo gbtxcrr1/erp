@@ -32,8 +32,8 @@ Vendas
             <td>{{ sale.client.name }}</td>
             <td>{{ sale.product.name }}</td>
             <td>{{ sale.quantity }}</td>
-            <td>R$ {{ '%.2f'|format(sale.unit_price) }}</td>
-            <td>R$ {{ '%.2f'|format(sale.total_price) }}</td>
+            <td>{{ sale.unit_price|brl }}</td>
+            <td>{{ sale.total_price|brl }}</td>
             <td class="actions">
                 <form method="POST" action="/sales/{{ sale.id }}/delete" class="inline-form">
 					<input type="hidden" name="csrf_token" value="{{ csrf_token() }}">

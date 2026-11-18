@@ -218,23 +218,44 @@ def new_client():
     return render_template("new_client.html")
 
 
+
 @app.route("/clients/<int:client_id>/edit", methods=["GET", "POST"])
 @login_required
 def edit_client(client_id):
     client = Client.query.get_or_404(client_id)
+
     if request.method == "POST":
+        cpf = request.form["cpf"]
+
+        existing_client = Client.query.filter(
+            Client.cpf == cpf,
+            Client.id != client.id
+        ).first()
+
+        if existing_client:
+            flash("Este CPF já está cadastrado para outro cliente.")
+            return render_template(
+                "new_client.html",
+                client=client,
+                form_data=request.form
+            )
+
         client.name = request.form["name"]
-        client.cpf = request.form["cpf"]
+        client.cpf = cpf
         client.phone = request.form["phone"]
         client.email = request.form["email"]
         client.address = request.form["address"]
         client.city = request.form["city"]
         client.state = request.form["state"]
         client.cep = request.form["cep"]
+
         db.session.commit()
+
         flash("Cliente atualizado com sucesso!")
         return redirect(url_for("clients"))
+
     return render_template("new_client.html", client=client)
+
 
 
 @app.route("/clients/<int:client_id>/delete", methods=["POST"])
