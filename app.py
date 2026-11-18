@@ -119,7 +119,6 @@ def logout():
     flash("Você saiu do sistema.")
     return redirect(url_for("login"))
 
-
 @app.route("/")
 @login_required
 def home():
@@ -134,6 +133,35 @@ def home():
     balance = total_revenue - total_expense
     total_products = Product.query.count()
 
+    # Monthly sales
+    now = datetime.utcnow()
+    month_start = datetime(now.year, now.month, 1)
+
+    if now.month == 12:
+        next_month = datetime(now.year + 1, 1, 1)
+    else:
+        next_month = datetime(now.year, now.month + 1, 1)
+
+    sales_count, sales_total = db.session.query(
+        func.count(Sale.id),
+        func.sum(Sale.total_price)
+    ).filter(
+        Sale.date >= month_start,
+        Sale.date < next_month
+    ).one()
+
+    sales_total = sales_total or 0
+
+    # Low stock products
+    low_stock_items = StockItem.query.join(Product).filter(
+        Product.active.is_(True),
+        StockItem.quantity <= StockItem.min_quantity
+    ).all()
+
+    # Recent sales
+    recent_sales = Sale.query.order_by(
+        Sale.date.desc()
+    ).limit(5).all()
 
     # Monthly financial data
     month_names = [
@@ -141,7 +169,6 @@ def home():
         "Jul", "Ago", "Set", "Out", "Nov", "Dez"
     ]
 
-    now = datetime.utcnow()
     months = {}
 
     for offset in range(5, -1, -1):
@@ -184,9 +211,12 @@ def home():
         total_expense=total_expense,
         balance=balance,
         total_products=total_products,
-        chart_data=chart_data
+        chart_data=chart_data,
+        sales_count=sales_count,
+        sales_total=sales_total,
+        low_stock_items=low_stock_items,
+        recent_sales=recent_sales
     )
-
 
 
 # ===================== CLIENTS =====================
@@ -604,11 +634,16 @@ def new_sale():
 
 
 @app.route("/sales/<int:sale_id>/delete", methods=["POST"])
-@role_required("manager", "admin")
+@login_required
 def delete_sale(sale_id):
+    if g.user.role not in ["manager", "admin"]:
+        flash("Você não tem permissão para excluir vendas.", "error")
+        return redirect(url_for("sales"))
+
     sale = Sale.query.get_or_404(sale_id)
     db.session.delete(sale)
     db.session.commit()
+
     flash("Venda removida.")
     return redirect(url_for("sales"))
 

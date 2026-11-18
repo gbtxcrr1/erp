@@ -299,6 +299,10 @@ td.empty {
     border-radius: 12px;
 }
 
+.dashboard-section-header {
+    margin-bottom: 16px;
+}
+
 .dashboard-section-header h3 {
     margin: 0;
     color: #333333;
@@ -310,10 +314,18 @@ td.empty {
     font-size: 14px;
 }
 
+.financial-header {
+    margin-bottom: 0;
+}
+
+.financial-header > div:first-child {
+    padding-bottom: 15px;
+}
+
 .chart-container {
     position: relative;
     height: 300px;
-    margin-top: 25px;
+    margin-top: 0;
 }
 
 .theme-selector {
@@ -427,6 +439,74 @@ body.dark-mode .dashboard-section-header p {
 
 body.dark-mode .dashboard-section-header h3 {
     color: #e2e8f0;
+}
+
+/* ===== DASHBOARD GRID ===== */
+
+.dashboard-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 20px;
+}
+
+.dashboard-grid .dashboard-section {
+    min-width: 0;
+}
+
+@media (max-width: 900px) {
+    .dashboard-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+.summary-card small {
+    display: block;
+    margin-top: 5px;
+    color: #888;
+    font-size: 12px;
+}
+
+body.dark-mode .summary-card small {
+    color: #aab7c8;
+}
+
+.chart-switch {
+    display: flex;
+    gap: 4px;
+    padding: 4px;
+    background: #f1f3f5;
+    border-radius: 8px;
+}
+
+.chart-switch button {
+    border: none;
+    background: transparent;
+    padding: 7px 12px;
+    border-radius: 6px;
+    cursor: pointer;
+    color: #777;
+    font-size: 13px;
+}
+
+/* =========== GRAPH ============ */
+
+.chart-switch button.active {
+    background: white;
+    color: #123a6b;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+body.dark-mode .chart-switch {
+    background: #2a3545;
+}
+
+body.dark-mode .chart-switch button {
+    color: #aab7c8;
+}
+
+body.dark-mode .chart-switch button.active {
+    background: #3a4a60;
+    color: white;
 }
 
 /* Flash messages */

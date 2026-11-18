@@ -10,26 +10,26 @@ Início
 
 <div class="summary">
 
-<div class="summary-card">
-    <span class="summary-label">Receitas</span>
-    <span class="summary-value revenue">
-        {{ total_revenue|brl }}
-    </span>
-</div>
+    <div class="summary-card">
+        <span class="summary-label">Receitas</span>
+        <span class="summary-value revenue">
+            {{ total_revenue|brl }}
+        </span>
+    </div>
 
-<div class="summary-card">
-    <span class="summary-label">Despesas</span>
-    <span class="summary-value expense">
-        {{ total_expense|brl }}
-    </span>
-</div>
+    <div class="summary-card">
+        <span class="summary-label">Despesas</span>
+        <span class="summary-value expense">
+            {{ total_expense|brl }}
+        </span>
+    </div>
 
-<div class="summary-card">
-    <span class="summary-label">Saldo</span>
-    <span class="summary-value {{ 'revenue' if balance >= 0 else 'expense' }}">
-        {{ balance|brl }}
-    </span>
-</div>
+    <div class="summary-card">
+        <span class="summary-label">Saldo</span>
+        <span class="summary-value {{ 'revenue' if balance >= 0 else 'expense' }}">
+            {{ balance|brl }}
+        </span>
+    </div>
 
     <div class="summary-card">
         <span class="summary-label">Produtos cadastrados</span>
@@ -38,28 +38,119 @@ Início
         </span>
     </div>
 
+    <div class="summary-card">
+        <span class="summary-label">Vendas realizadas</span>
+        <span class="summary-value">
+            {{ sales_count }}
+        </span>
+        <small>Este mês</small>
+    </div>
+
+    <div class="summary-card">
+        <span class="summary-label">Valor vendido</span>
+        <span class="summary-value revenue">
+            {{ sales_total|brl }}
+        </span>
+        <small>Este mês</small>
+    </div>
+
 </div>
 
 
-<div class="dashboard-section">
-    <div class="dashboard-section-header">
-        <div>
-            <h3>Visão Financeira</h3>
-            <p>Receitas e despesas dos últimos meses</p>
+<div class="dashboard-section-header financial-header">
+    <div>
+        <h3>Visão Financeira</h3>
+        <p>Receitas e despesas dos últimos meses</p>
+    </div>
+
+    <div class="chart-switch">
+        <button type="button" class="active" data-chart="bar">Barras</button>
+        <button type="button" data-chart="line">Linha</button>
+    </div>
+</div>
+
+<div class="chart-container">
+    <canvas id="financialChart"></canvas>
+</div>
+
+
+<div class="dashboard-grid">
+
+    <div class="dashboard-section">
+        <div class="dashboard-section-header">
+            <div>
+                <h3>Estoque baixo</h3>
+                <p>Produtos que precisam de reposição</p>
+            </div>
         </div>
+
+        {% if low_stock_items %}
+        <table>
+            <thead>
+                <tr>
+                    <th>PRODUTO</th>
+                    <th>QUANTIDADE</th>
+                    <th>MÍNIMO</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in low_stock_items %}
+                <tr>
+                    <td>{{ item.product.name }}</td>
+                    <td>{{ item.quantity }}</td>
+                    <td>{{ item.min_quantity }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+        <p class="empty">Nenhum produto com estoque baixo.</p>
+        {% endif %}
     </div>
 
-    <div class="chart-container">
-        <canvas id="financialChart"></canvas>
+
+    <div class="dashboard-section">
+        <div class="dashboard-section-header">
+            <div>
+                <h3>Últimas vendas</h3>
+                <p>As cinco vendas mais recentes</p>
+            </div>
+        </div>
+
+        {% if recent_sales %}
+        <table>
+            <thead>
+                <tr>
+                    <th>CLIENTE</th>
+                    <th>DATA</th>
+                    <th>TOTAL</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for sale in recent_sales %}
+                <tr>
+                    <td>{{ sale.client.name }}</td>
+                    <td>{{ sale.date.strftime('%d/%m/%Y') }}</td>
+                    <td>{{ sale.total_price|brl }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+        <p class="empty">Nenhuma venda registrada.</p>
+        {% endif %}
     </div>
+
 </div>
+
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 <script>
     const chartData = {{ chart_data | tojson }};
+    const canvas = document.getElementById("financialChart");
 
-    new Chart(document.getElementById("financialChart"), {
+    const chartConfig = {
         type: "bar",
         data: {
             labels: chartData.map(item => item.month),
@@ -68,15 +159,21 @@ Início
                     label: "Receitas",
                     data: chartData.map(item => item.revenue),
                     backgroundColor: "#86c9a5",
+                    borderColor: "#86c9a5",
                     borderRadius: 6,
-                    barPercentage: 0.65
+                    barPercentage: 0.65,
+                    tension: 0.3,
+                    fill: false
                 },
                 {
                     label: "Despesas",
                     data: chartData.map(item => item.expenses),
                     backgroundColor: "#e9a1a1",
+                    borderColor: "#e9a1a1",
                     borderRadius: 6,
-                    barPercentage: 0.65
+                    barPercentage: 0.65,
+                    tension: 0.3,
+                    fill: false
                 }
             ]
         },
@@ -101,7 +198,6 @@ Início
                     borderColor: "#eeeeee",
                     borderWidth: 1,
                     padding: 12,
-                    displayColors: true,
                     callbacks: {
                         label: function(context) {
                             return context.dataset.label + ": " +
@@ -138,7 +234,36 @@ Início
                 }
             }
         }
+    };
+
+    const financialChart = new Chart(canvas, chartConfig);
+
+    document.querySelectorAll(".chart-switch button").forEach(button => {
+        button.addEventListener("click", function() {
+            const selectedChart = this.dataset.chart;
+
+            document.querySelectorAll(".chart-switch button").forEach(item => {
+                item.classList.remove("active");
+            });
+
+            this.classList.add("active");
+
+            financialChart.data.datasets.forEach(dataset => {
+                if (selectedChart === "line") {
+                    dataset.borderWidth = 2;
+                    dataset.pointRadius = 4;
+                    dataset.pointHoverRadius = 6;
+                } else {
+                    dataset.borderWidth = 0;
+                    dataset.pointRadius = 0;
+                }
+            });
+
+            financialChart.config.type = selectedChart;
+            financialChart.update();
+        });
     });
 </script>
+
 
 {% endblock %}
