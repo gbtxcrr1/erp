@@ -9,3 +9,9 @@ MOVEMENT_DIRECTIONS = {
     "in": "Entrada",
     "out": "Saída"
 }
+
+EMPLOYEE_POSITIONS = {
+    "employee": "Funcionário",
+    "manager": "Gerente",
+    "admin": "Administrador"
+}

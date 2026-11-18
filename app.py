@@ -7,7 +7,7 @@ from flask_wtf.csrf import CSRFProtect
 from sqlalchemy import func
 from datetime import datetime, timedelta
 from zoneinfo import ZoneInfo
-from translations import MOVEMENT_TYPES, MOVEMENT_DIRECTIONS
+from translations import MOVEMENT_TYPES, MOVEMENT_DIRECTIONS, EMPLOYEE_POSITIONS
 
 BRAZIL_TZ = ZoneInfo("America/Sao_Paulo")
 UTC = ZoneInfo("UTC")
@@ -797,7 +797,11 @@ def delete_transaction(transaction_id):
 @role_required("admin")
 def employees():
     employees = Employee.query.all()
-    return render_template("employees.html", employees=employees)
+    return render_template(
+        "employees.html",
+        employees=employees,
+        EMPLOYEE_POSITIONS=EMPLOYEE_POSITIONS
+    )
 
 
 @app.route("/employees/new", methods=["GET", "POST"])
